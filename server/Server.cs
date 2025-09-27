@@ -1,9 +1,9 @@
 ﻿
-using System.Diagnostics;
 using System.Net;
 using System.Net.Sockets;
-using System.Runtime.InteropServices.Swift;
+using System.Runtime.InteropServices;
 using System.Security.Cryptography;
+using System.Text;
 using System.Threading.Channels;
 
 namespace server
@@ -19,6 +19,8 @@ namespace server
     {
         public NetState state = NetState.None;
         public int connectId = 0;
+        public byte[]? data = null;
+        public Connection? connection = null;
 
         public static Message Connect(int _connectId)
         {
@@ -26,15 +28,36 @@ namespace server
             msg.connectId = _connectId;
             return msg;
         }
+
+        public static Message Data(Connection connection, byte[] data)
+        {
+            Message msg = new Message();
+            msg.data = data;
+            msg.connection = connection;
+
+            return msg;
+        }
+
+        public static Message Disconnect(int connectId)
+        {
+            Message msg = new Message();
+            msg.connectId = connectId;
+
+            return msg;
+        }
     }
 
     class Connection
     {
         public int connectId;
+        public TcpClient client;
+        public NetworkStream stream;
 
-        Connection(int _connectId)
+        public Connection(int _connectId, TcpClient _client)
         {
             connectId = _connectId;
+            client = _client;
+            stream = _client.GetStream();
         }
     }
 
@@ -43,10 +66,12 @@ namespace server
         TcpListener? listener;
         bool running = false;
         Channel<Message> channel;
+        Dictionary<int, Connection> connections;
 
         public Server() 
         {
             channel = Channel.CreateBounded<Message>(10);
+            connections = new Dictionary<int, Connection>();
         }
 
         public void ServeAt(int port)
@@ -72,11 +97,6 @@ namespace server
                 Task process = Task.Run(Process);
 
                 Task.WaitAll(listen, process);
-
-                while (running)
-                {
-                    Thread.Sleep(1);
-                }
             }
             catch (Exception ex)
             {
@@ -88,7 +108,7 @@ namespace server
             }
         }
 
-        async void Process()
+        async Task Process()
         {
             while (running)
             {
@@ -102,10 +122,15 @@ namespace server
 
         void ProcessMessage(Message msg)
         {
+            if (msg.data != null)
+            {
+                // process the data packet
+                OnDataReceived(msg);
+            }
             // dispatch the message
             if (msg.state == NetState.Connected)
             {
-                Console.WriteLine($"connected!!!{msg.connectId}");
+                Console.WriteLine($"connected!{msg.connectId}");
             }
             else if (msg.state == NetState.Disconnected)
             {
@@ -113,8 +138,27 @@ namespace server
             }
         }
 
+        void OnDataReceived(Message message)
+        {
+            Connection connection = message.connection!;
+            
+            string msg = Encoding.Unicode.GetString(message.data!);
+
+            Console.WriteLine($"on data received: {msg.Length}, {msg}");
+
+            // write back to client
+            // write length
+            ReadOnlySpan<byte> msgSpan = MemoryMarshal.AsBytes(msg.AsSpan());
+            byte[] lenByte = BitConverter.GetBytes(msgSpan.Length);
+
+            connection.stream.Write(lenByte);
+            connection.stream.Write(msgSpan);
+//            ReadonlySp MemoryMarshal.AsBytes(msg.AsSpan());
+
+        }
+
         // listening task
-        async void Listen()
+        async Task Listen()
         {
             int connectId = 100;
 
@@ -130,15 +174,51 @@ namespace server
 
                 Console.WriteLine($"client connected: {client.Client.RemoteEndPoint}");
 
-                Task _ = Task.Run(() => HandleConnection(connectId, client));
+                Connection connection = new Connection(connectId, client);
+
+                connections.Add(connectId, connection);
+                Task _ = Task.Run(() => HandleConnection(connection));
 
                 connectId++;
             }
         }
 
-        async Task HandleConnection(int connectId, TcpClient client)
+        async Task HandleConnection(Connection connection)
         {
-            Console.WriteLine($"handle connection: {connectId}");
+            Console.WriteLine($"handle connection: {connection.connectId}");
+            NetworkStream stream = connection.stream;
+            while (running)
+            {
+                try
+                {
+                    byte[] lenBuff = new byte[sizeof(int)];
+                    await stream.ReadExactlyAsync(lenBuff);
+
+                    int len = BitConverter.ToInt32(lenBuff, 0);
+
+                    Console.WriteLine($"read length: {len}");
+
+                    byte[] dataBuff = new byte[len];
+                    await stream.ReadExactlyAsync(dataBuff);
+                    // data readed
+                    //MemoryStream memory = new MemoryStream(dataBuff);
+                    //BinaryReader reader = new BinaryReader(memory);
+                    // send to process task
+
+                    await channel.Writer.WriteAsync(Message.Data(connection, dataBuff));
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"exception in reading: {ex.Message}");
+                    await channel.Writer.WriteAsync(Message.Disconnect(connection.connectId));
+                    break;
+                }
+                finally
+                {
+                    // Console.WriteLine("disconnected!");
+                    // connection.channel.Send(Message::Connected());
+                }
+            }
         }
 
         void Stop()

@@ -5,11 +5,4 @@ namespace services
     {
         void Dispatch(BinaryReader reader);
     }
-
-    class Server
-    {
-        public Server(IDispatcher dispatcher) 
-        {
-        }
-    }
 }

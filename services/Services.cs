@@ -1,11 +1,25 @@
-﻿namespace services
+﻿using System.Net.Sockets;
+
+namespace services
 {
-    public interface IServices
+    enum NetState
     {
+        None,
+        Connected,
+        Disconnected,
     }
 
-    public class Services
+    public interface IServices
     {
+        IConnection NewConnection(TcpClient client);
+        void OnConnected(IConnection connection);
+        void OnDisconnected(IConnection connection);
+    }
 
+    public interface IConnection
+    {
+        void OnConnected(TcpClient client);
+        void OnDisconnected();
+        void DispatchRpc(byte[] data);
     }
 }

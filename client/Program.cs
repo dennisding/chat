@@ -1,127 +1,53 @@
 ﻿using System.Net;
 using System.Net.Sockets;
+using System.Reflection;
+using System.Reflection.Emit;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Runtime.InteropServices.Swift;
 using System.Text;
 using System.Threading.Channels;
 
+using services;
+
 namespace client
 {
-    //enum NetState
-    //{
-    //    None,
-    //    Connect,
-    //    Disconnect,
-    //}
 
-    //class Message
-    //{
-    //    public NetState State = NetState.None;
+    class ClassBuilder
+    {
+        
+        public void AddMethod()
+        {
+            AssemblyName name = new AssemblyName("Test");
+            var builder = AssemblyBuilder.DefineDynamicAssembly(name, AssemblyBuilderAccess.Run);
 
-    //    public byte[]? data;
+            var moduleBuilder = builder.DefineDynamicModule("Test");
 
-    //    public static Message Connect()
-    //    {
-    //        Message msg = new Message();
-    //        msg.State = NetState.Connect;
+            var typeBuilder = moduleBuilder.DefineType("Remote", TypeAttributes.Public);
+        }
+    }
 
-    //        return msg;
-    //    }
+    class ClientRemote : services.IServerMethod
+    {
+        TcpClient client;
+        NetworkStream stream;
 
-    //    public static Message Data(byte[] data)
-    //    {
-    //        Message msg = new Message();
-    //        msg.data = data;
+        public ClientRemote(TcpClient client)
+        {
+            this.client = client;
+            this.stream = client.GetStream();
+        }
 
-    //        return msg;
-    //    }
-    //}
-
-    //class Client
-    //{
-    //    bool connected = false;
-    //    TcpClient client;
-    //    Channel<Message> channel;
-    //    NetworkStream? stream = null;
-
-    //    public Client()
-    //    {
-    //        client = new TcpClient();
-    //        channel = Channel.CreateUnbounded<Message>();
-    //    }
-
-    //    public void Connect(string ip, int port)
-    //    {
-    //        IPAddress address = IPAddress.Parse(ip);
-    //        client.Connect(address, port);
-
-    //        Task.Run(() => Read());
-    //        connected = true;
-
-    //        Console.WriteLine("Connected!");
-    //        stream = client.GetStream();
-
-    //        OnConnected();
-    //    }
-
-    //    void OnConnected()
-    //    {
-    //        // echo client
-    //        string msg = "msg from client!!!!";
-    //        ReadOnlySpan<byte> rawBytes = MemoryMarshal.AsBytes(msg.AsSpan());
-
-    //        byte[] len = BitConverter.GetBytes(rawBytes.Length);
-
-    //        stream?.Write(len, 0, len.Length);
-    //        stream?.Write(rawBytes);
-    //    }
-
-    //    public void Poll()
-    //    {
-    //        if (stream == null)
-    //        {
-    //            return;
-    //        }
-
-    //        Message? msg;
-    //        while (channel.Reader.TryRead(out msg))
-    //        {
-    //            DispatchMessage(msg);
-    //        }
-    //    }
-
-    //    void DispatchMessage(Message message)
-    //    {
-    //        if (message.data != null)
-    //        {
-    //            string msg = Encoding.Unicode.GetString(message.data);
-    //            // packet received
-    //            Console.WriteLine($"on message received! {msg.Length}, {msg}");
-    //        }
-    //    }
-
-    //    public async Task Read()
-    //    {
-    //        // make the compiler happy
-    //        while (connected)
-    //        {
-    //            byte[] lenBuff = new byte[sizeof(int)];
-    //            await stream!.ReadExactlyAsync(lenBuff);
-
-    //            int len = BitConverter.ToInt32(lenBuff, 0);
-    //            byte[] data = new byte[len];
-
-    //            await stream.ReadExactlyAsync(data);
-
-    //            await channel.Writer.WriteAsync(Message.Data(data));
-    //        }
-    //    }
-    //}
+        public void Echo(string msg)
+        {
+        }
+    }
 
     class ClientServices : services.IConnection
     {
         TcpClient? client = null;
+        //        ClientRemote? remote = null;
+        services.IServerMethod? remote = null;
 
         public ClientServices()
         {
@@ -131,25 +57,27 @@ namespace client
         {
             Console.WriteLine("OnConnected");
             this.client = client;
+//            remote = new ClientRemote(client);
 
             // send the msg to client
             string msg = "msg from client";
-            SendString(msg);
+            remote.Echo(msg);
+//            SendString(msg);
         }
 
-        void SendString(string msg)
-        {
-            ReadOnlySpan<byte> buff = MemoryMarshal.AsBytes(msg.AsSpan());
-            byte[] lenBuffer = BitConverter.GetBytes(buff.Length);
+        //void SendString(string msg)
+        //{
+        //    ReadOnlySpan<byte> buff = MemoryMarshal.AsBytes(msg.AsSpan());
+        //    byte[] lenBuffer = BitConverter.GetBytes(buff.Length);
 
-            NetworkStream stream = client!.GetStream();
+        //    NetworkStream stream = client!.GetStream();
 
-            stream.Write(lenBuffer);
-            stream.Write(buff);
-            stream.Flush();
+        //    stream.Write(lenBuffer);
+        //    stream.Write(buff);
+        //    stream.Flush();
 
-            Console.WriteLine($"send data to server: {buff.Length}");
-        }
+        //    Console.WriteLine($"send data to server: {buff.Length}");
+        //}
 
         public void OnDisconnected() 
         {
@@ -171,20 +99,19 @@ namespace client
         {
             Console.WriteLine("Hello, World!");
 
-            ClientServices services = new ClientServices();
+            IClientMethod remote = (IClientMethod)RemoteBuilder.Build(typeof(IClientMethod));
 
-            services.Client client = new services.Client(services);
-
-            client.Connect("127.0.0.1", 999);
-
-            while (true)
+            try
             {
-                client.Poll();
-
-                Thread.Sleep(10);
+                remote.EchoBack("call remote method");
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"exception: {ex}");
             }
 
-            //Client client = new Client();
+            //ClientServices services = new ClientServices();
+            //services.Client client = new services.Client(services);
 
             //client.Connect("127.0.0.1", 999);
 
@@ -192,14 +119,8 @@ namespace client
             //{
             //    client.Poll();
 
-            //    Thread.Sleep(1);
+            //    Thread.Sleep(10);
             //}
-
-            //TcpClient client = new TcpClient();
-
-            //IPAddress addr = IPAddress.Parse("127.0.0.1");
-
-            //client.Connect(addr, 999)
         }
     }
 }

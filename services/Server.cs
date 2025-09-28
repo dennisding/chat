@@ -44,7 +44,7 @@ namespace services
                 {
                     TcpClient client = await listener!.AcceptTcpClientAsync();
 
-                    Console.WriteLine($"Client Connected: {client.Client.RemoteEndPoint}");
+                    Console.WriteLine($"Client Connected: {connectId}, {client.Client.RemoteEndPoint}");
 
                     IConnection connection = services.NewConnection(client);
                     ConnectionInfo info = new ConnectionInfo(connectId, client, connection);

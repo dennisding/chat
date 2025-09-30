@@ -1,4 +1,4 @@
-﻿namespace services
+﻿namespace Services
 {
     public interface IServerMethod
     {

@@ -2,19 +2,21 @@
 using System.Net.Sockets;
 using System.Threading.Channels;
 
-namespace services
+namespace Services
 {
-    public class Server
+    public class Server<IClient, IServer>
     {
         bool running = false;
         Dictionary<int, ConnectionInfo> connections;
         TcpListener? listener = null;
         IServices services;
+        Dispatcher dispatcher;
         Channel<Message> channel;
 
-        public Server(IServices _services)
+        public Server(IServices services)
         {
-            services = _services;
+            this.services = services;
+            dispatcher = DispatcherBuilder.Build(typeof(IServer));
 
             connections = new Dictionary<int, ConnectionInfo>();
             channel = Channel.CreateUnbounded<Message>();
@@ -75,6 +77,8 @@ namespace services
                     await stream.ReadExactlyAsync(lenBuffer);
                     int len = BitConverter.ToInt32(lenBuffer);
 
+                    Console.WriteLine($"Client readed: {len}");
+
                     byte[] data = new byte[len];
                     await stream.ReadExactlyAsync(data);
 
@@ -83,6 +87,7 @@ namespace services
                 catch (Exception)
                 {
                     info.clinet.Close();
+                    break;
                 }
             }
         }
@@ -123,14 +128,17 @@ namespace services
             
             services.OnConnected(info.connection);
 
-            info.connection.OnConnected(info.clinet);
+            IClientMethod remote = RemoteBuilder.Build<IClientMethod>(info.clinet);
+            info.connection.OnConnected(remote);
+//            info.connection.OnConnected(info.clinet);
         }
 
         void OnDataReceived(ConnectionInfo info, byte[] data)
         {
-            Console.WriteLine($"OndataReceived!{data.Length}");
+            MemoryStream stream = new MemoryStream(data);
+            BinaryReader reader = new BinaryReader(stream);
 
-            info.connection.DispatchRpc(data);
+            dispatcher.Dispatch(info.connection, reader);
         }
     }
 }

@@ -1,7 +1,7 @@
 ﻿
 using System.Net.Sockets;
 
-namespace services
+namespace Services
 {
     class ConnectionInfo
     {
@@ -10,7 +10,9 @@ namespace services
         public NetworkStream stream;
         public IConnection connection;
 
-        public ConnectionInfo(int connectId, TcpClient client, IConnection connection)
+        public ConnectionInfo(int connectId, 
+            TcpClient client, 
+            IConnection connection)
         {
             this.connectId = connectId;
             this.clinet = client;

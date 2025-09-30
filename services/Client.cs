@@ -5,7 +5,7 @@ using System.Net.Sockets;
 using System.Runtime.CompilerServices;
 using System.Threading.Channels;
 
-namespace services
+namespace Services
 {
     class ClientMessage
     {
@@ -33,16 +33,19 @@ namespace services
         }
     }
 
-    public class Client
+    public class Client<IClient>
     {
-        IConnection connection;
+        IClientServices services;
+        Dispatcher dispatcher;
+
         TcpClient client;
         bool connected = false;
         Channel<ClientMessage> channel;
 
-        public Client(IConnection connection)
+        public Client(IClientServices service)
         {
-            this.connection = connection;
+            this.services = service;
+            this.dispatcher = DispatcherBuilder.Build(typeof(IClient));
             this.client = new TcpClient();
             this.channel = Channel.CreateUnbounded<ClientMessage>();
         }
@@ -103,20 +106,29 @@ namespace services
 
         void OnConnected()
         {
-            connection.OnConnected(client);
+            services.OnConnected(client);
         }
 
         void OnDisconnected() 
         {
             Console.WriteLine("OnDisconnected");
             connected = false;
-            connection.OnDisconnected();
+            services.OnDisconnected();
         }
 
         void OnDataReceived(byte[] data)
         {
-            Console.WriteLine($"OnDataReceived: {data.Length}");
-            connection.DispatchRpc(data);
+            if (data.Length == 0)
+            {
+                connected = false;
+                return;
+            }
+
+            MemoryStream stream = new MemoryStream(data);
+            BinaryReader reader = new BinaryReader(stream);
+
+            // dispatch the method
+            dispatcher.Dispatch(services, reader);
         }
 
         async Task HandleReadAsync(string host, int port)
@@ -124,7 +136,6 @@ namespace services
             Console.WriteLine("handle async read!!!");
             try
             {
-                // connect
                 IPAddress addr = IPAddress.Parse(host);
                 await client.ConnectAsync(addr, port);
                 connected = true;

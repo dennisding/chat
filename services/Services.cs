@@ -1,6 +1,6 @@
 ﻿using System.Net.Sockets;
 
-namespace services
+namespace Services
 {
     enum NetState
     {
@@ -18,8 +18,13 @@ namespace services
 
     public interface IConnection
     {
+        void OnConnected(object remote);
+        void OnDisconnected();
+    }
+
+    public interface IClientServices
+    {
         void OnConnected(TcpClient client);
         void OnDisconnected();
-        void DispatchRpc(byte[] data);
     }
 }

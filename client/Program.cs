@@ -8,46 +8,13 @@ using System.Runtime.InteropServices.Swift;
 using System.Text;
 using System.Threading.Channels;
 
-using services;
+using Services;
 
 namespace client
 {
-
-    class ClassBuilder
+    class ClientServices : Services.IClientServices, Services.IClientMethod
     {
-        
-        public void AddMethod()
-        {
-            AssemblyName name = new AssemblyName("Test");
-            var builder = AssemblyBuilder.DefineDynamicAssembly(name, AssemblyBuilderAccess.Run);
-
-            var moduleBuilder = builder.DefineDynamicModule("Test");
-
-            var typeBuilder = moduleBuilder.DefineType("Remote", TypeAttributes.Public);
-        }
-    }
-
-    class ClientRemote : services.IServerMethod
-    {
-        TcpClient client;
-        NetworkStream stream;
-
-        public ClientRemote(TcpClient client)
-        {
-            this.client = client;
-            this.stream = client.GetStream();
-        }
-
-        public void Echo(string msg)
-        {
-        }
-    }
-
-    class ClientServices : services.IConnection
-    {
-        TcpClient? client = null;
-        //        ClientRemote? remote = null;
-        services.IServerMethod? remote = null;
+        IServerMethod? remote = null;
 
         public ClientServices()
         {
@@ -55,41 +22,21 @@ namespace client
 
         public void OnConnected(TcpClient client)
         {
+            remote = RemoteBuilder.Build<IServerMethod>(client);
             Console.WriteLine("OnConnected");
-            this.client = client;
-//            remote = new ClientRemote(client);
-
             // send the msg to client
-            string msg = "msg from client";
-            remote.Echo(msg);
-//            SendString(msg);
+            string msg = "msg from client!!";
+            remote!.Echo(msg);
         }
-
-        //void SendString(string msg)
-        //{
-        //    ReadOnlySpan<byte> buff = MemoryMarshal.AsBytes(msg.AsSpan());
-        //    byte[] lenBuffer = BitConverter.GetBytes(buff.Length);
-
-        //    NetworkStream stream = client!.GetStream();
-
-        //    stream.Write(lenBuffer);
-        //    stream.Write(buff);
-        //    stream.Flush();
-
-        //    Console.WriteLine($"send data to server: {buff.Length}");
-        //}
 
         public void OnDisconnected() 
         {
             Console.WriteLine("OnDisconnected");
         }
 
-        public void DispatchRpc(byte[] data)
+        public void EchoBack(string msg)
         {
-            Console.WriteLine("dispatch rpc!!!");
-
-            string msg = Encoding.Unicode.GetString(data);
-            Console.WriteLine($"msg from server, {msg}");
+            Console.WriteLine($"EchoBack: {msg}");
         }
     }
 
@@ -97,30 +44,50 @@ namespace client
     {
         static void Main(string[] args)
         {
-            Console.WriteLine("Hello, World!");
+            Console.WriteLine("Hello, World client!");
 
-            IClientMethod remote = (IClientMethod)RemoteBuilder.Build(typeof(IClientMethod));
+//            TestPack();
 
-            try
+            ClientServices services = new ClientServices();
+
+            var client = new Services.Client<IClientMethod>(services);
+
+            client.Connect("127.0.0.1", 999);
+
+            while (true)
             {
-                remote.EchoBack("call remote method");
+                client.Poll();
+
+                Thread.Sleep(10);
             }
-            catch (Exception ex)
-            {
-                Console.WriteLine($"exception: {ex}");
-            }
+        }
 
-            //ClientServices services = new ClientServices();
-            //services.Client client = new services.Client(services);
+        static byte[] BuildMethod()
+        {
+            MemoryStream stream = new MemoryStream();
 
-            //client.Connect("127.0.0.1", 999);
+            // rpcId, msg
+            Packer.PackInt(stream, 10);
+            Packer.PackString(stream, "msg from test");
 
-            //while (true)
-            //{
-            //    client.Poll();
+            return stream.GetBuffer();
+        }
 
-            //    Thread.Sleep(10);
-            //}
+        static void TestPack()
+        {
+            MemoryStream stream = new MemoryStream();
+
+            Packer.PackInt(stream, 100);
+            Packer.PackString(stream, "hello from client!!!!");
+
+            MemoryStream newStream = new MemoryStream(stream.GetBuffer());
+            BinaryReader reader = new BinaryReader(newStream);
+
+            int iv = Packer.UnpackInt(reader);
+            string sv = Packer.UnpackString(reader);
+
+
+            Console.WriteLine($"TestPack: iv:{iv}, sv:{sv}");
         }
     }
 }

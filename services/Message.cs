@@ -1,5 +1,5 @@
 ﻿
-namespace services
+namespace Services
 {
     class Message
     {

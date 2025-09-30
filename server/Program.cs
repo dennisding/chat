@@ -1,14 +1,15 @@
-﻿using services;
-using System;
+﻿using System;
 using System.Net.Sockets;
 using System.Runtime.InteropServices;
 using System.Runtime.InteropServices.Swift;
 using System.Security.Cryptography;
 using System.Transactions;
 
+using Services;
+
 namespace server
 {
-    class ChatServices : services.IServices
+    class ChatServices : IServices
     {
         public ChatServices() 
         {
@@ -16,7 +17,7 @@ namespace server
 
         public IConnection NewConnection(TcpClient client)
         {
-            return new ChatConnection(client);
+            return new ChatConnection();
         }
 
         public void OnConnected(IConnection connection)
@@ -30,17 +31,16 @@ namespace server
         }
     }
 
-    class ChatConnection : services.IConnection
+    class ChatConnection : IConnection, IServerMethod
     {
-        TcpClient client;
-
-        public ChatConnection(TcpClient client) 
+        IClientMethod? remote;
+        public ChatConnection() 
         {
-            this.client = client;
         }
 
-        public void OnConnected(TcpClient client)
+        public void OnConnected(object remote)
         {
+            this.remote = (IClientMethod)remote;
             Console.WriteLine("OnConnectionConnected");
         }
 
@@ -49,18 +49,25 @@ namespace server
             Console.WriteLine("OnConnectionDisconnected");
         }
 
-        public void DispatchRpc(byte[] data)
+        public void Echo(string msg)
         {
-            Console.WriteLine("DispatchRpc");
+            Console.WriteLine($"msg from client!{msg}");
 
-            // send the data back
-            NetworkStream stream = client.GetStream();
-
-            byte[] buffer = BitConverter.GetBytes(data.Length);
-            stream.Write(buffer);
-            stream.Write(data);
-            stream.Flush();
+            remote!.EchoBack(msg);
         }
+
+        //public void DispatchRpc(byte[] data)
+        //{
+        //    Console.WriteLine("DispatchRpc");
+
+        //    // send the data back
+        //    //NetworkStream stream = client.GetStream();
+
+        //    //byte[] buffer = BitConverter.GetBytes(data.Length);
+        //    //stream.Write(buffer);
+        //    //stream.Write(data);
+        //    //stream.Flush();
+        //}
     }
 
 
@@ -68,9 +75,10 @@ namespace server
     {
         static void Main(string[] args)
         {
-            Console.WriteLine("Hello, World!");
+            Console.WriteLine("Hello, World server!");
 
-            services.Server server = new services.Server(new ChatServices());
+            ChatServices services = new ChatServices();
+            var server = new Server<IClientMethod, IServerMethod>(services);
 
             server.ServeForeverAt(999);
 

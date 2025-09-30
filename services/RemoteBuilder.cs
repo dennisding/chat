@@ -4,8 +4,9 @@ using System.Net.Sockets;
 using System.Reflection;
 using System.Reflection.Emit;
 using System.Runtime.CompilerServices;
+using System.Transactions;
 
-namespace services
+namespace Services
 {
     /// <summary>
     ///  class Remote
@@ -31,22 +32,39 @@ namespace services
         public static Dictionary<Type, Type> types = new Dictionary<Type, Type>();
         public static ModuleBuilder moduleBuilder = CreateModuleBuilder();
 
-        public static object Build(Type type)
+        //public static object Build(Type type, TcpClient client)
+        //{
+        //    if (types.TryGetValue(type, out var value))
+        //    {
+        //        return Activator.CreateInstance(value)!;
+        //    }
+
+        //    Type newType = CreateRemoteType(type);
+        //    types.Add(type, newType);
+
+        //    return Activator.CreateInstance(newType)!;
+        //}
+
+        public static T Build<T>(TcpClient client)
         {
-            if (types.TryGetValue(type, out var value))
+            Type type = typeof(T);
+            if (!types.ContainsKey(type))
             {
-                return Activator.CreateInstance(value)!;
+                Type newType = CreateRemoteType(type);
+                types.Add(type, newType);
             }
 
-            Type newType = CreateRemoteType(type);
-            types.Add(type, newType);
+            Type remoteType = types[type];
 
-            return Activator.CreateInstance(newType)!;
+            T obj = (T)Activator.CreateInstance(remoteType)!;
+            FieldInfo clientInfo = remoteType.GetField("client")!;
+            clientInfo.SetValue(obj, client);
+            return obj;
         }
 
         static ModuleBuilder CreateModuleBuilder()
         {
-            var name = new AssemblyName("Remote");
+            var name = new AssemblyName("ServicesRemote");
             var assemblyBuilder = AssemblyBuilder.DefineDynamicAssembly(name, AssemblyBuilderAccess.Run);
 
             return assemblyBuilder.DefineDynamicModule("Remote");
@@ -60,17 +78,96 @@ namespace services
                 typeof(object), 
                 new Type[] {type});
 
-//            builder.AddInterfaceImplementation(type);
+            // define the attribute
+            FieldInfo clientInfo = builder.DefineField("client", typeof(TcpClient), FieldAttributes.Public);
 
-            foreach (var methodInfo in type.GetMethods())
+            MethodInfo[] methods = type.GetMethods();
+            int[] methodIds = GenMethodIds(methods);
+
+            for (int index = 0; index < methodIds.Length; ++index)
             {
-                AddRemoteMethod(builder, methodInfo);
+                int methodId = methodIds[index];
+                AddRemoteMethod(builder, clientInfo, methodId, methods[index]);
             }
             
             return builder.CreateType();
         }
 
-        static void AddRemoteMethod(TypeBuilder builder, MethodInfo methodInfo)
+        public static int[] GenMethodIds(MethodInfo[] infos)
+        {
+            Dictionary<string, int> idDict = new Dictionary<string, int>();
+
+            foreach (MethodInfo info in infos)
+            {
+                idDict.Add(info.Name, 0);
+            }
+
+            var orderedIds = idDict.Keys.ToArray().Order().ToArray();
+            int idBegin = 10; // 前面0~9 共10个编号留着做特殊用途
+            for (int index = 0; index < orderedIds.Length; ++index)
+            {
+                int id = idBegin + index;
+                string name = orderedIds[index];
+                idDict[name] = id;
+            }
+            
+            
+            int[] result = new int[infos.Length];
+            for (int index = 0; index < result.Length; ++index)
+            {
+                MethodInfo info = infos[index];
+                result[index] = idDict[info.Name];
+                Console.WriteLine($"gen method id: {info.Name}, {result[index]}");
+            }
+
+            return result;
+        }
+
+        static void EmitMethodCode(ILGenerator code, FieldInfo client, int methodId, Type[] parameters)
+        {
+            // 调用 remote.Name(arg1, arg2, arg3);
+            // MemoryStream stream = new MemoryStream();
+            ConstructorInfo con = typeof(MemoryStream).GetConstructor(Type.EmptyTypes)!;
+            code.Emit(OpCodes.Newobj, con); // memoryStream
+
+            // Packer.PackInt(stream, methodId)
+            PackerInfo intInfo = PackerInfo.Get(typeof(int));
+            code.Emit(OpCodes.Dup); // memoryStream, memoryStream
+            code.Emit(OpCodes.Ldc_I4, methodId); // memoryStream, memoryStream, methodId
+            code.EmitCall(OpCodes.Call, intInfo.packer, Type.EmptyTypes); // memoryStream
+
+            for (int index = 0; index < parameters.Length; ++index)
+            {
+                // Packer.Pack{Int, String..}(stream, arg1);
+                Type param = parameters[index];
+                code.Emit(OpCodes.Dup); // memoryStream, memoryStream
+                code.Emit(OpCodes.Ldarg, index + 1); // memorystream, memoryStream, arg_index
+                PackerInfo info = PackerInfo.Get(param);
+                code.EmitCall(OpCodes.Call, info.packer, Type.EmptyTypes); // memoryStream
+            }
+            
+            // RemoteBuilder.SendStream(meoryStream, client)
+            code.Emit(OpCodes.Ldarg_0); // memoryStream, this
+            code.Emit(OpCodes.Ldfld, client); // memoryStream, TcpClient
+            MethodInfo packStream = typeof(RemoteBuilder).GetMethod(
+                "SendStream",
+                BindingFlags.Static | BindingFlags.Public)!;
+            code.EmitCall(OpCodes.Call, packStream, Type.EmptyTypes); // (empty)
+
+            code.Emit(OpCodes.Ret);
+        }
+
+        public static void SendStream(MemoryStream stream, TcpClient client)
+        {
+            byte[] lenBuff = BitConverter.GetBytes((int)stream.Length);
+            NetworkStream netStream = client.GetStream();
+            // send the package
+            netStream.Write(lenBuff);
+            netStream.Write(stream.GetBuffer(), 0, (int)stream.Length);
+            netStream.Flush();
+        }
+
+        static void AddRemoteMethod(TypeBuilder builder, FieldInfo client, int methodId, MethodInfo methodInfo)
         {
             Type[] parameterTypes = new Type[methodInfo.GetParameters().Length];
             for (int index = 0; index < parameterTypes.Length; ++index)
@@ -87,77 +184,7 @@ namespace services
 
             ILGenerator code = methodBuilder.GetILGenerator();
 
-            ConstructorInfo memoryStreamCon = typeof(MemoryStream).GetConstructor(Type.EmptyTypes)!;
-            code.Emit(OpCodes.Newobj, memoryStreamCon);
-
-            //            code.Emit(OpCodes.Pop);
-            //code.Emit(OpCodes.Ldind_I4, 1024);
-
-            //MethodInfo methodPack = typeof(RemoteBuilder).GetMethod(
-            //        "Pack", 
-            //        new Type[] {typeof(MemoryStream), typeof(int)}
-            //    )!;
-            //code.EmitCall(OpCodes.Call, methodPack, null);
-            MethodInfo methodPack = typeof(RemoteBuilder).GetMethod(
-                    "Pack", 
-                    new Type[] {typeof(MemoryStream), typeof(int)}
-                )!;
-            code.Emit(OpCodes.Ldc_I4, 1025);
-            code.EmitCall(OpCodes.Call, methodPack, null);
-
-            code.Emit(OpCodes.Ret);
-            //// void methodName(arg1, arg2, arg3, arg3)
-            //// MemoryStream memory = new MemoryStream();
-            //// byte[] buff = new byte[4];
-            //// memory.Write(buff);
-            //// memory.Flush();
-            //code.EmitWriteLine("hello!!!");
-            ////ConstructorInfo ctor = typeof(MemoryStream).GetConstructor(Type.EmptyTypes)!;
-            ////code.Emit(OpCodes.Ldarg_1);
-            ////code.EmitWriteLine("hello!!!");
-
-            //MethodInfo newStream = typeof(RemoteBuilder).GetMethod("NewStream", Type.EmptyTypes)!;
-
-            //code.EmitCall(OpCodes.Call, newStream, null);
-            //code.Emit(OpCodes.Pop);
-
-            ////MethodInfo method = typeof(RemoteBuilder).GetMethod("Pack", new Type[] {typeof(MemoryStream), typeof(int)})!;
-            //MethodInfo method = typeof(RemoteBuilder).GetMethod("Test", 
-            //    Type.EmptyTypes)!;
-            //code.EmitCall(OpCodes.Call, method, Type.EmptyTypes);
-
-            ////code.EmitCall(OpCodes.Call, method, null);
-            //code.Emit(OpCodes.Ret);
-        }
-
-        public static MemoryStream NewStream()
-        {
-            return new MemoryStream();
-        }
-
-        public static void Test()
-        {
-            Console.WriteLine("test call!!!");
-        }
-
-        public static void Pack2(int i1)
-        {
-            Console.WriteLine($"call by generate code: {i1}");
-        }
-
-        public static void Pack2(int i1, int i2)
-        {
-            Console.WriteLine($"call by generate code: {i1}, {i2}");
-        }
-
-        public static void Pack(MemoryStream stream, int value)
-        {
-            Console.WriteLine($"Call by generated code: {stream}, {value}");
-        }
-
-        public static void Pack(int i1)
-        {
-            Console.WriteLine($"pack i1: {i1}");
+            EmitMethodCode(code, client, methodId, parameterTypes);
         }
     }
 }

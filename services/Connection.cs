@@ -8,11 +8,11 @@ namespace Services
         public int connectId;
         public TcpClient clinet;
         public NetworkStream stream;
-        public IConnection connection;
+        public IConnection? connection;
 
         public ConnectionInfo(int connectId, 
             TcpClient client, 
-            IConnection connection)
+            IConnection? connection = null)
         {
             this.connectId = connectId;
             this.clinet = client;

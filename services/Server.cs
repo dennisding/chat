@@ -9,11 +9,11 @@ namespace Services
         bool running = false;
         Dictionary<int, ConnectionInfo> connections;
         TcpListener? listener = null;
-        IServices services;
+        IServices<IClient> services;
         Dispatcher dispatcher;
         Channel<Message> channel;
 
-        public Server(IServices services)
+        public Server(IServices<IClient> services)
         {
             this.services = services;
             dispatcher = DispatcherBuilder.Build(typeof(IServer));
@@ -48,8 +48,8 @@ namespace Services
 
                     Console.WriteLine($"Client Connected: {connectId}, {client.Client.RemoteEndPoint}");
 
-                    IConnection connection = services.NewConnection(client);
-                    ConnectionInfo info = new ConnectionInfo(connectId, client, connection);
+//                    IConnection connection = services.NewConnection(client);
+                    ConnectionInfo info = new ConnectionInfo(connectId, client);
 
                     await channel.Writer.WriteAsync(Message.Connect(info));
 
@@ -77,8 +77,6 @@ namespace Services
                     await stream.ReadExactlyAsync(lenBuffer);
                     int len = BitConverter.ToInt32(lenBuffer);
 
-                    Console.WriteLine($"Client readed: {len}");
-
                     byte[] data = new byte[len];
                     await stream.ReadExactlyAsync(data);
 
@@ -86,6 +84,7 @@ namespace Services
                 }
                 catch (Exception)
                 {
+                    await channel.Writer.WriteAsync(Message.Disconnect(info));
                     info.clinet.Close();
                     break;
                 }
@@ -120,17 +119,26 @@ namespace Services
             {
                 OnConnected(msg.info!);
             }
+            else if (msg.netState == NetState.Disconnected)
+            {
+                OnDisconnected(msg.info!);
+            }
         }
 
         void OnConnected(ConnectionInfo info)
         {
             connections.Add(info.connectId, info);
+
+            IClient remote = RemoteBuilder.Build<IClient>(info.clinet);
+            info.connection = services.NewConnection(info.clinet, remote);
             
             services.OnConnected(info.connection);
+            info.connection.OnConnected();
+        }
 
-            IClientMethod remote = RemoteBuilder.Build<IClientMethod>(info.clinet);
-            info.connection.OnConnected(remote);
-//            info.connection.OnConnected(info.clinet);
+        void OnDisconnected(ConnectionInfo info)
+        {
+            info.connection!.OnDisconnected();
         }
 
         void OnDataReceived(ConnectionInfo info, byte[] data)
@@ -138,7 +146,7 @@ namespace Services
             MemoryStream stream = new MemoryStream(data);
             BinaryReader reader = new BinaryReader(stream);
 
-            dispatcher.Dispatch(info.connection, reader);
+            dispatcher.Dispatch(info.connection!, reader);
         }
     }
 }

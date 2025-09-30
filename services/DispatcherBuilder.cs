@@ -1,7 +1,6 @@
 ﻿
 namespace Services
 {
-    using System.Net.Sockets;
     using System.Reflection;
     using System.Reflection.Emit;
     using DispatcherDict = Dictionary<int, DispatcherDelegate>;
@@ -11,6 +10,7 @@ namespace Services
     public class DispatcherBuilder
     {
         public static ModuleBuilder moduleBuilder = CreateModuleBuilder();
+        public static Dictionary<Type, DispatcherDict> dispatchers = new Dictionary<Type, DispatcherDict>();
 
         static ModuleBuilder CreateModuleBuilder()
         {
@@ -23,14 +23,19 @@ namespace Services
         // 返回了一个实现了inter 接口的 dispatcher
         public static Dispatcher Build(Type inter)
         {
-            DispatcherDict dispatcherDict = BuildDispatcherDict(inter);
+            DispatcherDict dispatcherDict = GetDispatcherDict(inter);
             Dispatcher dispatcher = new Dispatcher(dispatcherDict);
 
             return dispatcher;
         }
 
-        static DispatcherDict BuildDispatcherDict(Type inter)
+        static DispatcherDict GetDispatcherDict(Type inter)
         {
+            if (dispatchers.ContainsKey(inter))
+            {
+                return dispatchers[inter];
+            }
+
             DispatcherDict result = new DispatcherDict();
             Type dispatcherType = CreateDispatchType(inter);
 
@@ -113,7 +118,7 @@ namespace Services
 
     public class Dispatcher
     {
-        // 用一个字典来存
+        // 用一个字典来存dispatcher
         public DispatcherDict dispatchers;
 
         public Dispatcher(DispatcherDict dispatchers)

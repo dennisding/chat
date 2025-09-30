@@ -16,6 +16,15 @@ namespace Services
             return msg;
         }
 
+        public static Message Disconnect(ConnectionInfo info)
+        {
+            Message msg = new Message();
+            msg.netState = NetState.Disconnected;
+            msg.info = info;
+
+            return msg;
+        }
+
         public static Message DataReceived(ConnectionInfo info, byte[] data)
         {
             Message msg = new Message();

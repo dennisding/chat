@@ -1,8 +1,6 @@
 ﻿
-using System.Diagnostics;
 using System.Net;
 using System.Net.Sockets;
-using System.Runtime.CompilerServices;
 using System.Threading.Channels;
 
 namespace Services
@@ -33,16 +31,16 @@ namespace Services
         }
     }
 
-    public class Client<IClient>
+    public class Client<IClient, IServer>
     {
-        IClientServices services;
+        IClientServices<IServer> services;
         Dispatcher dispatcher;
 
         TcpClient client;
         bool connected = false;
         Channel<ClientMessage> channel;
 
-        public Client(IClientServices service)
+        public Client(IClientServices<IServer> service)
         {
             this.services = service;
             this.dispatcher = DispatcherBuilder.Build(typeof(IClient));
@@ -67,18 +65,15 @@ namespace Services
             // process the read and write
             try
             {
-                while (true)
+                while (channel.Reader.TryRead(out ClientMessage? msg))
                 {
-                    if (channel.Reader.TryRead(out ClientMessage? msg))
+                    try
                     {
-                        try
-                        {
-                            DispatchMessage(msg);
-                        }
-                        catch (Exception e)
-                        {
-                            Console.WriteLine($"Dispatch exception: {e}");
-                        }
+                        DispatchMessage(msg);
+                    }
+                    catch (Exception e)
+                    {
+                        Console.WriteLine($"Dispatch Exception: {e}");
                     }
                 }
             }
@@ -106,12 +101,12 @@ namespace Services
 
         void OnConnected()
         {
-            services.OnConnected(client);
+            IServer remote = RemoteBuilder.Build<IServer>(client)!;
+            services.OnConnected(client, remote);
         }
 
         void OnDisconnected() 
         {
-            Console.WriteLine("OnDisconnected");
             connected = false;
             services.OnDisconnected();
         }
@@ -133,7 +128,6 @@ namespace Services
 
         async Task HandleReadAsync(string host, int port)
         {
-            Console.WriteLine("handle async read!!!");
             try
             {
                 IPAddress addr = IPAddress.Parse(host);

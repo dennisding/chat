@@ -1,49 +1,14 @@
 ﻿
-using System.ComponentModel;
 using System.Net.Sockets;
 using System.Reflection;
 using System.Reflection.Emit;
-using System.Runtime.CompilerServices;
-using System.Transactions;
 
 namespace Services
 {
-    /// <summary>
-    ///  class Remote
-    ///  {
-    ///     TcpClient client;
-    ///     NetworkStream stream;
-    ///     public Remote(TcpClient client) {
-    ///         this.client = client;
-    ///         this.stream = stream;
-    ///     }
-    ///     public Close() {
-    ///     
-    ///     }
-    ///     public void Echo(string msg)
-    ///     {
-    ///         MemoryStream stream = new MemoryStream();
-    ///         stream.write(ToStream(msg));
-    ///     }
-    ///  }
-    /// </summary>
     public class RemoteBuilder
     {
         public static Dictionary<Type, Type> types = new Dictionary<Type, Type>();
         public static ModuleBuilder moduleBuilder = CreateModuleBuilder();
-
-        //public static object Build(Type type, TcpClient client)
-        //{
-        //    if (types.TryGetValue(type, out var value))
-        //    {
-        //        return Activator.CreateInstance(value)!;
-        //    }
-
-        //    Type newType = CreateRemoteType(type);
-        //    types.Add(type, newType);
-
-        //    return Activator.CreateInstance(newType)!;
-        //}
 
         public static T Build<T>(TcpClient client)
         {
@@ -117,7 +82,6 @@ namespace Services
             {
                 MethodInfo info = infos[index];
                 result[index] = idDict[info.Name];
-                Console.WriteLine($"gen method id: {info.Name}, {result[index]}");
             }
 
             return result;

@@ -1,23 +1,19 @@
-﻿using System;
-using System.Net.Sockets;
-using System.Runtime.InteropServices;
-using System.Runtime.InteropServices.Swift;
-using System.Security.Cryptography;
-using System.Transactions;
+﻿using System.Net.Sockets;
 
 using Services;
+using Common;
 
 namespace server
 {
-    class ChatServices : IServices
+    class ChatServices : IServices<IClientMethod>
     {
         public ChatServices() 
         {
         }
 
-        public IConnection NewConnection(TcpClient client)
+        public IConnection NewConnection(TcpClient client, IClientMethod remote)
         {
-            return new ChatConnection();
+            return new ChatConnection(client, remote);
         }
 
         public void OnConnected(IConnection connection)
@@ -33,14 +29,16 @@ namespace server
 
     class ChatConnection : IConnection, IServerMethod
     {
-        IClientMethod? remote;
-        public ChatConnection() 
+        IClientMethod remote;
+        TcpClient client;
+        public ChatConnection(TcpClient _client, IClientMethod _remote) 
         {
+            client = _client;
+            remote = (IClientMethod)_remote;
         }
 
-        public void OnConnected(object remote)
+        public void OnConnected()
         {
-            this.remote = (IClientMethod)remote;
             Console.WriteLine("OnConnectionConnected");
         }
 
@@ -55,19 +53,6 @@ namespace server
 
             remote!.EchoBack(msg);
         }
-
-        //public void DispatchRpc(byte[] data)
-        //{
-        //    Console.WriteLine("DispatchRpc");
-
-        //    // send the data back
-        //    //NetworkStream stream = client.GetStream();
-
-        //    //byte[] buffer = BitConverter.GetBytes(data.Length);
-        //    //stream.Write(buffer);
-        //    //stream.Write(data);
-        //    //stream.Flush();
-        //}
     }
 
 
@@ -81,10 +66,6 @@ namespace server
             var server = new Server<IClientMethod, IServerMethod>(services);
 
             server.ServeForeverAt(999);
-
-            //Server server = new Server();
-
-            //server.ServeForeverAt(999);
         }
     }
 }

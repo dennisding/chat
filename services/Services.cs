@@ -9,22 +9,22 @@ namespace Services
         Disconnected,
     }
 
-    public interface IServices
+    public interface IServices<RemoteType>
     {
-        IConnection NewConnection(TcpClient client);
+        IConnection NewConnection(TcpClient client, RemoteType remote);
         void OnConnected(IConnection connection);
         void OnDisconnected(IConnection connection);
     }
 
     public interface IConnection
     {
-        void OnConnected(object remote);
+        void OnConnected();
         void OnDisconnected();
     }
 
-    public interface IClientServices
+    public interface IClientServices<RemoteType>
     {
-        void OnConnected(TcpClient client);
+        void OnConnected(TcpClient client, RemoteType remote);
         void OnDisconnected();
     }
 }

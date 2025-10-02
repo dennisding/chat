@@ -1,5 +1,5 @@
 ﻿
-namespace client
+namespace ChatClient
 {
     class CommandMgr
     {

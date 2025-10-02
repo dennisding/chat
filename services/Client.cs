@@ -118,7 +118,6 @@ namespace Services
                 connected = false;
                 return;
             }
-
             MemoryStream stream = new MemoryStream(data);
             BinaryReader reader = new BinaryReader(stream);
 

@@ -1,7 +1,7 @@
 ﻿
 using System.Threading.Channels;
 
-namespace client
+namespace ChatClient
 {
     class InputMgr
     {

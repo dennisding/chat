@@ -34,6 +34,7 @@ namespace Services
         {
             DefinePacker(typeof(int), "PackInt", "UnpackInt");
             DefinePacker(typeof(string), "PackString", "UnpackString");
+            DefinePacker(typeof(bool), "PackBool", "UnpackBool");
         }
 
         static void DefinePacker(Type type, string packer, string unpacker)
@@ -64,6 +65,17 @@ namespace Services
         public static int UnpackInt(BinaryReader reader)
         {
             return reader.ReadInt32();
+        }
+
+        public static void PackBool(MemoryStream stream, bool value)
+        {
+            byte[] data = BitConverter.GetBytes(value);
+            stream.Write(data);
+        }
+
+        public static bool UnpackBool(BinaryReader reader)
+        {
+            return reader.ReadBoolean();
         }
 
         public static void PackString(MemoryStream stream, string value)

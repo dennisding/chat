@@ -1,8 +1,8 @@
-﻿using Services;
-using Common;
+﻿using Common;
+using Services;
 using System.Net.Sockets;
 
-namespace client
+namespace ChatClient
 {
     class ClientServices : Services.IClientServices<IServerMethod>, IClientMethod
     {
@@ -31,7 +31,7 @@ namespace client
             remote!.Echo(msg);
         }
 
-        public void OnDisconnected() 
+        public void OnDisconnected()
         {
             Console.WriteLine("OnDisconnected");
         }

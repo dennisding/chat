@@ -1,7 +1,7 @@
 ﻿
 //global using ActorId = long;
 
-namespace server
+namespace Server
 {
     public class Game
     {
@@ -24,13 +24,16 @@ namespace server
 
         public static ActorId CreateActor(string name)
         {
-            ActorId aid = GenActorId();
+            Console.WriteLine($"CreateActor, {name}");
 
-            Console.WriteLine($"CreateActor, {name}, {aid}");
+            Actor actor = actorMgr!.CreateActor(name);
 
-            Actor actor = actorMgr!.CreateActor(name, aid);
+            return actor.aid;
+        }
 
-            return aid;
+        public static ActorId CreateActor(string name, Action<string, ActorId, Actor> callback)
+        {
+            return actorMgr!.CreateActor(name, callback);
         }
 
         public static void DelActor(ActorId aid)

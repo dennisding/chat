@@ -5,12 +5,17 @@
     <TargetFramework>net9.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
+	<EmitCompilerGeneratedFiles>true</EmitCompilerGeneratedFiles>
+	<CompilerGeneratedFilesOutputPath>Generated</CompilerGeneratedFilesOutputPath>
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\client\client.csproj" />
-    <ProjectReference Include="..\common\common.csproj" />
+    <ProjectReference Include="..\client\Client.csproj" />
+    <ProjectReference Include="..\common\Common.csproj" />
     <ProjectReference Include="..\Protocol\Protocol.csproj" />
+	<ProjectReference Include="..\ProtocolGenerator\ProtocolGenerator.csproj" 
+                      OutputItemType="Analyzer" 
+	                  ReferenceOutputAssembly="false" />
   </ItemGroup>
 
 </Project>

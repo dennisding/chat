@@ -1,7 +1,9 @@
 ﻿
 
 using Common;
-using client;
+using Client;
+using System.Runtime.InteropServices.Swift;
+using Services;
 
 namespace ChatClient
 {
@@ -11,7 +13,19 @@ namespace ChatClient
         {
         }
 
+        public override void Init()
+        {
+        }
+
+        public override void Finit()
+        {
+        }
+
         public override void EnterWorld()
+        {
+        }
+
+        public override void LeaveWorld()
         {
         }
     }

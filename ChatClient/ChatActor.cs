@@ -1,6 +1,6 @@
 ﻿
 using Common;
-using client;
+using Client;
 
 namespace ChatClient
 {

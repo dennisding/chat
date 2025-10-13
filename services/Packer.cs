@@ -22,12 +22,24 @@ namespace Services
 
         public static PackerInfo Get(Type type)
         {
-            if (packers == null) 
+            //if (packers == null) 
+            //{
+            //    packers = new PackerInfoDict();
+            //    DefinePackers();
+            //}
+            PreparePackers();
+            return packers![type];
+        }
+
+        static void PreparePackers()
+        {
+            if (packers != null)
             {
-                packers = new PackerInfoDict();
-                DefinePackers();
+                return;
             }
-            return packers[type];
+
+            packers = new PackerInfoDict();
+            DefinePackers();
         }
 
         static void DefinePackers()
@@ -35,6 +47,8 @@ namespace Services
             DefinePacker(typeof(int), "PackInt", "UnpackInt");
             DefinePacker(typeof(string), "PackString", "UnpackString");
             DefinePacker(typeof(bool), "PackBool", "UnpackBool");
+            DefinePacker(typeof(long), "PackLong", "UnpackLong");
+            DefinePacker(typeof(MemoryStream), "PackMemoryStream", "UnpackMemoryStream");
         }
 
         static void DefinePacker(Type type, string packer, string unpacker)
@@ -49,7 +63,16 @@ namespace Services
                     new Type[] { typeof(BinaryReader) }
                 );
 
-            PackerInfo info = new PackerInfo(packMethod!, unpackMethod!);
+            AddPacker(type, packMethod, unpackMethod);
+            //PackerInfo info = new PackerInfo(packMethod!, unpackMethod!);
+            //packers![type] = info;
+        }
+
+        public static void AddPacker(Type type, MethodInfo? packer, MethodInfo? unpacker)
+        {
+            PreparePackers();
+
+            PackerInfo info = new PackerInfo(packer!, unpacker!);
             packers![type] = info;
         }
     }
@@ -65,6 +88,17 @@ namespace Services
         public static int UnpackInt(BinaryReader reader)
         {
             return reader.ReadInt32();
+        }
+
+        public static void PackLong(MemoryStream stream, long value)
+        {
+            byte[] data = BitConverter.GetBytes(value);
+            stream.Write(data);
+        }
+
+        public static long UnpackLong(BinaryReader reader)
+        {
+            return reader.ReadInt64();
         }
 
         public static void PackBool(MemoryStream stream, bool value)
@@ -93,6 +127,19 @@ namespace Services
             byte[] data = reader.ReadBytes(len);
 
             return Encoding.Unicode.GetString(data);
+        }
+
+        // stream 只能作为最后一个参数
+        public static void PackMemoryStream(MemoryStream stream, MemoryStream value)
+        {
+            stream.Write(value.ToArray());
+        }
+
+        public static MemoryStream UnpackMemoryStream(BinaryReader reader)
+        {
+            long size = reader.BaseStream.Length - reader.BaseStream.Position;
+            MemoryStream stream = new MemoryStream(reader.ReadBytes((int)size));
+            return stream;
         }
     }
 }

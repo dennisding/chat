@@ -3,13 +3,13 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.13.35931.197
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "server", "server\server.csproj", "{A81C22E2-4864-4765-B53F-632F148B60AD}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Server", "server\Server.csproj", "{A81C22E2-4864-4765-B53F-632F148B60AD}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "services", "services\services.csproj", "{A36E47E5-FBBE-413C-AC13-BD8C028FBDAB}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Services", "services\Services.csproj", "{A36E47E5-FBBE-413C-AC13-BD8C028FBDAB}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "client", "client\client.csproj", "{56330968-9F1B-42E8-916C-A80E99164187}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Client", "client\Client.csproj", "{56330968-9F1B-42E8-916C-A80E99164187}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "common", "common\common.csproj", "{9DA3441D-879C-4788-9159-9FEA87B9F5C4}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Common", "common\Common.csproj", "{9DA3441D-879C-4788-9159-9FEA87B9F5C4}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "actors", "actors\actors.csproj", "{C7340864-F9C0-46CE-98A5-CB66C5AC0FDF}"
 EndProject
@@ -18,6 +18,8 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ChatServer", "ChatServer\ChatServer.csproj", "{91C86C6D-C5D6-4330-9562-825FB41005F0}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Protocol", "Protocol\Protocol.csproj", "{CDEB8C68-8FCE-49F8-B397-82D05519DBE1}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ProtocolGenerator", "ProtocolGenerator\ProtocolGenerator.csproj", "{F34360C8-269B-4E39-9906-8B264F8A88B4}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -57,6 +59,10 @@ Global
 		{CDEB8C68-8FCE-49F8-B397-82D05519DBE1}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{CDEB8C68-8FCE-49F8-B397-82D05519DBE1}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{CDEB8C68-8FCE-49F8-B397-82D05519DBE1}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F34360C8-269B-4E39-9906-8B264F8A88B4}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F34360C8-269B-4E39-9906-8B264F8A88B4}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F34360C8-269B-4E39-9906-8B264F8A88B4}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F34360C8-269B-4E39-9906-8B264F8A88B4}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

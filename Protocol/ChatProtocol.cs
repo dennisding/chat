@@ -3,11 +3,15 @@
     public interface ILoginClient
     {
         void LoginResult(bool isOk);
+        void Echo(string msg);
+        void EchoBack(string msg);
     }
 
     public interface ILoginCore
     {
         void Login(string name, string password);
+        void Echo(string msg);
+        void EchoBack(string msg);
     }
 
     public interface IChatClient

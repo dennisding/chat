@@ -9,8 +9,9 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\common\common.csproj" />
-    <ProjectReference Include="..\services\services.csproj" />
+    <ProjectReference Include="..\common\Common.csproj" />
+    <ProjectReference Include="..\Protocol\Protocol.csproj" />
+    <ProjectReference Include="..\services\Services.csproj" />
   </ItemGroup>
 
 </Project>

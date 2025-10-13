@@ -1,10 +1,11 @@
 ﻿
-namespace server
+namespace Server
 {
     public class Actor
     {
         public ActorId aid;
         public World? world;
+        public ActorConnection? clientInfo;
 
         public bool inWorld
         {
@@ -33,6 +34,15 @@ namespace server
         {
             world = null;
         }
+
+        public virtual void BindClient(ActorConnection client)
+        {
+            this.clientInfo = client;
+        }
+
+        public virtual void BecomePlayer()
+        {
+        }
     }
 
     public class ActorCore<IClient, IShadow> : Actor
@@ -40,6 +50,16 @@ namespace server
         public IClient? client;
         public IShadow? shadow;
         public ActorCore()
+        {
+        }
+
+        public override void BindClient(ActorConnection client)
+        {
+            base.BindClient(client);
+            // reset the clint and shadow
+        }
+
+        public override void BecomePlayer()
         {
         }
     }

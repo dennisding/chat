@@ -1,5 +1,5 @@
 ﻿
-namespace server
+namespace Server
 {
     class ActorMgr
     {
@@ -38,8 +38,9 @@ namespace server
             actor.Finit();
         }
 
-        public Actor CreateActor(string name, ActorId aid)
+        public Actor CreateActor(string name)
         {
+            ActorId aid = Game.GenActorId();
             Actor actor = (Actor)Activator.CreateInstance(types[name])!;
             actor.aid = aid;
 
@@ -48,10 +49,12 @@ namespace server
             return actor;
         }
 
-        public void CreateActor(string name, ActorId aid, Action<Actor> createCallback)
+        public ActorId CreateActor(string name, Action<string, ActorId, Actor> createCallback)
         {
-            Actor actor = CreateActor(name, aid);
-            createCallback(actor);
+            Actor actor = CreateActor(name);
+            createCallback(name, actor.aid, actor);
+
+            return actor.aid;
         }
     }
 }

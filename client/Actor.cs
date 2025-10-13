@@ -1,9 +1,13 @@
-﻿using Services;
+﻿using Common;
+using Services;
 
-namespace client
+namespace Client
 {
     public class Actor
     {
+        public ActorId aid;
+        ActorServices? services;
+
         public virtual void Init()
         {
 
@@ -22,6 +26,11 @@ namespace client
         public virtual void LeaveWorld()
         {
 
+        }
+
+        public void BindClient(ActorServices? services)
+        {
+            this.services = services;
         }
     }
 

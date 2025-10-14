@@ -52,6 +52,7 @@ namespace Server
         public ActorId CreateActor(string name, Action<string, ActorId, Actor> createCallback)
         {
             Actor actor = CreateActor(name);
+            actor.aid = Game.GenActorId();
             createCallback(name, actor.aid, actor);
 
             return actor.aid;

@@ -1,6 +1,7 @@
 ﻿
-using Common;
 using Server;
+using Common;
+using Protocol;
 
 namespace ChatServer
 {

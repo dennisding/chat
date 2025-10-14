@@ -33,17 +33,13 @@ public class ProtocolGenerator : IIncrementalGenerator
         StringBuilder builder = new StringBuilder();
         InterfaceDeclarationSyntax inter = (InterfaceDeclarationSyntax)syntaxContext.Node;
 
-        string fileName = $"Protocol_{inter.Identifier.Text}.g.cs";
+        var interfaceSymbol = syntaxContext.SemanticModel.GetDeclaredSymbol(inter);
 
-        SourceText code = GenerateProtocolCode(syntaxContext);
-        sourceContext.AddSource(fileName, code);
-    }
+        InterfaceInfo info = InterfaceInfo.Build(interfaceSymbol!);
+        // set the module
+        info.containingNamespace = interfaceSymbol!.ContainingNamespace.Name;
 
-    SourceText GenerateProtocolCode(GeneratorSyntaxContext context)
-    {
-        StringBuilder builder = new StringBuilder();
-        builder.AppendLine();
-
-        return SourceText.From(builder.ToString(), Encoding.Unicode);
+        SenderBuilder.Build(sourceContext, info);
+        DispatcherBuilder.Build(sourceContext, info);
     }
 }

@@ -6,6 +6,7 @@ namespace Server
     public class Game
     {
         static ActorMgr? actorMgr;
+        static string defaultActor = "";
 
         public static void Init()
         {
@@ -36,6 +37,16 @@ namespace Server
             return actorMgr!.CreateActor(name, callback);
         }
 
+        public static ActorId CreateDefaultActor(Action<string, ActorId, Actor> callback)
+        {
+            string name = defaultActor;
+            if (name == "")
+            {
+                name = "Login";
+            }
+            return CreateActor(name, callback);
+        }
+
         public static void DelActor(ActorId aid)
         {
             actorMgr!.DelActor(aid);
@@ -47,7 +58,17 @@ namespace Server
             // 64 位, 高32为为当前秒数, 低32位是一个随机数
             long timeStamp = (int)DateTimeOffset.Now.ToUnixTimeSeconds();
             long rand = Random.Shared.Next();
-            return new  ActorId((timeStamp << 32) & rand);
+            return new  ActorId((timeStamp << 32) | rand);
+        }
+
+        public static void RegisterActor(string name, Type type)
+        {
+            actorMgr!.RegisterActor(name, type);
+        }
+
+        public static void SetDefaultActor(string name)
+        {
+            defaultActor = name;
         }
     }
 }

@@ -6,19 +6,21 @@ using System.Net.Sockets;
 
 namespace ChatClient
 {
-    interface Hi
+    public interface Hello
     {
-        void Hi();
+        void SayHello(string msg, ActorId aid);
+        void Echo(string msg);
+        void EchoBack(string msg);
     }
+
     internal class Program
     {
         static void Main(string[] args)
         {
             Console.WriteLine("Hello, World client!");
 
-            //ClientServices services = new ClientServices();
-
-            //var client = new Client<IClientMethod, IServerMethod>(services);
+            Init();
+            
             ActorServices services = CreateActorServices();
             // 
 
@@ -41,6 +43,11 @@ namespace ChatClient
             services.AddActorType("Login", typeof(LoginActor));
 
             return services;
+        }
+
+        static void Init()
+        {
+            Common.Initer.Init();
         }
     }
 }

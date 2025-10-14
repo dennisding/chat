@@ -8,7 +8,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\actors\actors.csproj" />
     <ProjectReference Include="..\common\Common.csproj" />
     <ProjectReference Include="..\Protocol\Protocol.csproj" />
     <ProjectReference Include="..\server\Server.csproj" />

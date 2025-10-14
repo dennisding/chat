@@ -1,5 +1,5 @@
 ﻿
-using Protocol;
+using Common;
 using Services;
 using System.Net.Sockets;
 
@@ -8,7 +8,6 @@ namespace Server
     public class ActorServices : IServices<IBasicClient>, IBasicServer
     {
         ActorId serviceId = Game.GenActorId();
-        int ConnectionIndex = 10; 
         public ActorServices()
         {
         }
@@ -34,12 +33,17 @@ namespace Server
         public void EchoBack(string msg)
         {
         }
+
+        public void ActorMessage(ActorId aid, MemoryStream stream)
+        {
+            Actor actor = Game.GetActor(aid)!;
+        }
     }
 
     public class ActorConnection: IConnection
     {
-        TcpClient client;
-        IBasicClient remote;
+        public TcpClient client;
+        public IBasicClient remote;
         ActorId aid;
         public ActorConnection(TcpClient client, IBasicClient remote)
         {
@@ -56,11 +60,8 @@ namespace Server
         {
             Console.WriteLine($"OnActorCreated: {aid}, {actor}");
             // bind the actor client
-            if (this.aid != aid)
-            {
-                Console.WriteLine($"Error in Actor Created: {this.aid}, {aid}");
-                return;
-            }
+
+            this.aid = aid;
 
             // 这里的流程需要进一步思考
             this.remote.CreateActor(name, aid);

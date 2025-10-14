@@ -40,6 +40,10 @@ namespace Server
             this.clientInfo = client;
         }
 
+        public virtual void DispatchMessage(MemoryStream stream)
+        {
+        }
+
         public virtual void BecomePlayer()
         {
         }

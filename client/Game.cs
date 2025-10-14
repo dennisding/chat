@@ -18,7 +18,7 @@ namespace Client
 
         public static Actor? GetActor(ActorId aid)
         {
-            return null;
+            return actorMgr!.GetActor(aid);
         }
 
         public static ActorId CreateActor(string type)
@@ -32,9 +32,9 @@ namespace Client
             return actorMgr.CreateActor(type, aid);
         }
 
-        public static void AddActorType(string name, Type type)
+        public static void RegisterActor(string name, Type type)
         {
-            actorMgr.AddActorType(name, type);
+            actorMgr.RegisterActor(name, type);
         }
     }
 }

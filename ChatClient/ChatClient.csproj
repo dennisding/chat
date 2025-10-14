@@ -12,10 +12,12 @@
   <ItemGroup>
     <ProjectReference Include="..\client\Client.csproj" />
     <ProjectReference Include="..\common\Common.csproj" />
+    <ProjectReference Include="..\ProtocolGenerator\ProtocolGenerator.csproj" 
+					  OutputItemType="Analyzer"
+                      ReferenceOutputAssembly="false"/>
     <ProjectReference Include="..\Protocol\Protocol.csproj" />
-	<ProjectReference Include="..\ProtocolGenerator\ProtocolGenerator.csproj" 
-                      OutputItemType="Analyzer" 
-	                  ReferenceOutputAssembly="false" />
+    <!-- 排除生成器输出目录从项目编译 -->
+    <Compile Remove="Generated/**" />
   </ItemGroup>
 
 </Project>

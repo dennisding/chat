@@ -28,9 +28,14 @@ namespace Client
 
         }
 
-        public void BindClient(ActorServices? services)
+        public virtual void BindClient(ActorServices? services)
         {
             this.services = services;
+        }
+
+        public virtual void DispatchMessage(BinaryReader reader)
+        {
+
         }
     }
 

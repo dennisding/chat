@@ -9,8 +9,8 @@ namespace Client
 {
     public class ActorServices : IClientServices<IBasicServer>, IBasicClient
     {
-        TcpClient? client;
-        IBasicServer? remote;
+        public TcpClient? client;
+        public IBasicServer? remote;
         ActorId? currentActor;
         public ActorServices()
         {
@@ -29,7 +29,7 @@ namespace Client
 
         public void AddActorType(string name, Type type)
         {
-            Game.AddActorType(name, type);
+            Game.RegisterActor(name, type);
         }
 
         public void Echo(string msg)
@@ -45,7 +45,7 @@ namespace Client
         // CreateEntity(aid, string TypeName, DataSerice)
         public void CreateActor(string name, ActorId aid)
         {
-            Console.WriteLine($"CreateActor:{name}");
+            Console.WriteLine($"CreateActor:{name}, {aid}");
             Game.CreateActor(name, aid);
         }
 
@@ -62,6 +62,15 @@ namespace Client
             currentActor = aid;
             Actor actor = Game.GetActor(aid)!;
             actor.BindClient(this);
+        }
+
+        public void ActorMessage(ActorId aid, MemoryStream stream)
+        {
+            Console.WriteLine($"OnActorMessage: {aid}");
+
+            Actor actor = Game.GetActor(aid)!;
+            BinaryReader reader = new BinaryReader(stream);
+            actor.DispatchMessage(reader);
         }
     }
 }

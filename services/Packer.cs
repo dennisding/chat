@@ -7,7 +7,7 @@ namespace Services
 {
     using PackerInfoDict = Dictionary<Type, PackerInfo>;
 
-    class PackerInfo
+    public class PackerInfo
     {
         static PackerInfoDict? packers;
 
@@ -62,7 +62,6 @@ namespace Services
                     unpacker,
                     new Type[] { typeof(BinaryReader) }
                 );
-
             AddPacker(type, packMethod, unpackMethod);
             //PackerInfo info = new PackerInfo(packMethod!, unpackMethod!);
             //packers![type] = info;

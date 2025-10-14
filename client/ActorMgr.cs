@@ -13,26 +13,31 @@ namespace Client
             actorTypes = new Dictionary<string, Type>();
         }
 
-        public void AddActorType(string name, Type type)
+        public void RegisterActor(string name, Type type)
         {
             actorTypes[name] = type;
-        }
-
-        ActorId CreateActor(string name)
-        {
-            return new ActorId(0);
         }
 
         public ActorId CreateActor(string name, ActorId aid)
         {
             if (actorTypes.TryGetValue(name, out Type? type))
             {
+                Console.WriteLine($"do Create Actors{name}");
                 Actor actor = (Actor)Activator.CreateInstance(type)!;
                 actor.aid = aid;
                 actors[aid] = actor;
             }
 
             return aid;
+        }
+
+        public Actor? GetActor(ActorId aid)
+        {
+            if (actors.TryGetValue(aid, out Actor? actor))
+            {
+                return actor;
+            }
+            return null;
         }
     }
 }

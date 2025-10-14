@@ -59,8 +59,7 @@ namespace Services
             TypeBuilder builder = moduleBuilder.DefineType(
                 $"{inter.Name}_Dispatcher",
                 TypeAttributes.Public | TypeAttributes.Class,
-                typeof(object),
-                new Type[] { inter });
+                typeof(object));
 
             MethodInfo[] methods = inter.GetMethods();
             foreach (MethodInfo method in methods)

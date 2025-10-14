@@ -27,20 +27,22 @@ namespace Server
 
         public void Echo(string msg)
         {
-
+            Console.WriteLine($"ActorServices.Echo: {msg}");
         }
 
         public void EchoBack(string msg)
         {
+            Console.WriteLine($"ActorServices.EchoBack: {msg}");
         }
 
         public void ActorMessage(ActorId aid, MemoryStream stream)
         {
             Actor actor = Game.GetActor(aid)!;
+            Console.WriteLine($"ActorServices.ActorMessage: {aid}");
         }
     }
 
-    public class ActorConnection: IConnection
+    public class ActorConnection: IConnection, IBasicServer
     {
         public TcpClient client;
         public IBasicClient remote;
@@ -79,6 +81,24 @@ namespace Server
             {
                 Game.DelActor(aid);
             }
+        }
+
+        public void Echo(string msg)
+        {
+            Console.WriteLine($"Connection.Echo: {msg}");
+        }
+
+        public void EchoBack(string msg)
+        {
+            Console.WriteLine($"Connection.EchoBack: {msg}");
+        }
+
+        public void ActorMessage(ActorId aid, MemoryStream msg)
+        {
+            Console.WriteLine($"Connection.ActorMessage: {aid}, {msg.Length}");
+            Actor? actor = Game.GetActor(aid);
+
+            actor!.DispatchMessage(msg);
         }
     }
 }

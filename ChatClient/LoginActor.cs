@@ -70,24 +70,25 @@ namespace ChatClient
 
         public override void DispatchMessage(BinaryReader reader)
         {
-            Protocol.Dispatcher.ILoginClient.Dispatch(this, reader);
+            //            Protocol.Dispatcher.ILoginClient.Dispatch(this, reader);
+            Protocol.Dispatcher.ILoginClient_Dispatcher.Dispatch(this, reader);
         }
 
         // impl ILoginClient
         public void LoginResult(bool isOk)
         {
-            Console.WriteLine($"LoginResult: {isOk}");
+            Console.WriteLine($"LoginActor.LoginResult: {isOk}");
         }
 
         public void Echo(string msg)
         {
-            Console.WriteLine($"Echo: {msg}");
+            Console.WriteLine($"LoginActor.Echo: {msg}");
             core!.EchoBack(msg);
         }
 
         public void EchoBack(string msg)
         {
-            Console.WriteLine($"EchoBack: {msg}");
+            Console.WriteLine($"LoginActor.EchoBack: {msg}");
         }
     }
 }

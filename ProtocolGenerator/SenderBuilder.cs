@@ -1,15 +1,7 @@
 ﻿
 using Microsoft.CodeAnalysis;
-using Microsoft.CodeAnalysis.CSharp;
-using Microsoft.CodeAnalysis.Formatting;
 using Microsoft.CodeAnalysis.Text;
-using System.IO;
-using System.Runtime.InteropServices.ComTypes;
-using System.Runtime.Serialization.Formatters;
-using System.Security.Cryptography;
 
-//using System.Runtime.Serialization;
-using System.Security.Cryptography.X509Certificates;
 using System.Text;
 
 namespace ProtocolGenerator;
@@ -237,6 +229,12 @@ public class SenderBuilder
         packers.Add("bool", PackNumber);
         packers.Add("Boolean", PackNumber);
         packers.Add("Common.ActorId", PackActorId);
+        packers.Add("System.IO.MemoryStream", PackMemoryStream);
+    }
+
+    static void PackMemoryStream(StringBuilder builder, string prefix, string name)
+    {
+        builder.AppendLine(prefix + $"stream.Write({name}.ToArray());");
     }
 
     static void PackString(StringBuilder builder, string prefix, string name)

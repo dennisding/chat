@@ -205,7 +205,7 @@ public class DispatcherBuilder
 
     void AddDispatcherEnd(Indent indent)
     {
-        AppendLine("}", indent); // end of switch
+        AppendLine("}", indent.Next()); // end of switch
         AppendLine("}", indent); // end of Dispatcher
     }
 
@@ -218,9 +218,21 @@ public class DispatcherBuilder
     // unpack code goes here
     static void PrepareUnpackers()
     {
+        unpackers["bool"] = UnpackBool;
         unpackers["string"] = UnpackString;
         unpackers["Common.ActorId"] = UnpackActorId;
+        unpackers["System.IO.MemoryStream"] = UnpackMemoryStream;
     }
+
+    static void UnpackMemoryStream(StringBuilder builder, string prefix, ParameterInfo info)
+    {
+        //long size = reader.BaseStream.Length - reader.BaseStream.Position;
+        //MemoryStream stream = new MemoryStream(reader.ReadBytes((int)size));
+        //return stream;
+        builder.AppendLine(prefix + "long size = reader.BaseStream.Length - reader.BaseStream.Position;");
+        builder.AppendLine(prefix + "return new MemoryStream(reader.ReadBytes((int)size));");
+    }
+
     static void UnpackString(StringBuilder builder, string prefix, ParameterInfo info)
     {
         builder.AppendLine(prefix + "int len = reader.ReadInt32();");
@@ -230,6 +242,11 @@ public class DispatcherBuilder
         //byte[] data = reader.ReadBytes(len);
 
         //return Encoding.Unicode.GetString(data);
+    }
+
+    static void UnpackBool(StringBuilder builder, string prefix, ParameterInfo info)
+    {
+        builder.AppendLine(prefix + "return reader.ReadBoolean();");
     }
 
     static void UnpackActorId(StringBuilder builder, string prefix,ParameterInfo info)

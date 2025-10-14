@@ -4,14 +4,14 @@ namespace Common
 {
     public interface ISender
     {
-        void Send(MemoryStream stream);
+        void Send(MemoryStream _stream);
         void Close();
     }
 
-    public interface IDispatcher<T>
-    {
-        void Dispatch(T obj, BinaryReader reader);
-    }
+    //public interface IDispatcher<T>
+    //{
+    //    void Dispatch(T obj, BinaryReader reader);
+    //}
 
     public interface IActorNull
     {

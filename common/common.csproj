@@ -7,6 +7,9 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\ProtocolGenerator\ProtocolGenerator.csproj"
+					  OutputItemType="Analyzer"
+                      ReferenceOutputAssembly="false"/>
     <ProjectReference Include="..\services\Services.csproj" />
   </ItemGroup>
 

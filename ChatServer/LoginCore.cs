@@ -46,7 +46,8 @@ namespace ChatServer
 
             // send the client sender
             ClientSender sender = new ClientSender(aid, con);
-            client = new Protocol.Sender.ILoginClient(sender);
+            // client = new Protocol.Sender.ILoginClient(sender);
+            client = new Protocol.Sender.ILoginClient_Sender(sender);
 
             BecomePlayer();
         }
@@ -67,20 +68,21 @@ namespace ChatServer
 
         public void Login(string name, string password)
         {
-            Console.WriteLine($"Login: {name}, {password}");
+            Console.WriteLine($"LoginCore.Login: {name}, {password}");
             client!.LoginResult(name == password);
             //            this.client!.LoginResult(name == password);
         }
 
         public void Echo(string msg)
         {
-            Console.WriteLine($"Echo: {msg}");
+            Console.WriteLine($"LoginCore.Echo: {msg}");
             client!.EchoBack(msg);
         }
 
         public void EchoBack(string msg)
         {
-            Console.WriteLine($"EchoBack: {msg}");
+            Console.WriteLine($"LoginCore.EchoBack: {msg}");
+//            client!.Echo("msg from LoginCore");
         }
     }
 }

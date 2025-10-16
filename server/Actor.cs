@@ -1,4 +1,6 @@
 ﻿
+using Common;
+
 namespace Server
 {
     public class Actor
@@ -35,9 +37,14 @@ namespace Server
             world = null;
         }
 
-        public virtual void BindClient(ActorConnection client)
+        public virtual void BindClient(ActorConnection? client)
         {
             this.clientInfo = client;
+        }
+
+        public virtual void OnClientBinded()
+        {
+
         }
 
         public virtual void DispatchMessage(MemoryStream stream)
@@ -49,22 +56,38 @@ namespace Server
         }
     }
 
-    public class ActorCore<IClient, IShadow> : Actor
+    public class ActorCore<ClientImpl, CoreImpl> : Actor
+        where ClientImpl: class
+        where CoreImpl: class
     {
-        public IClient? client;
-        public IShadow? shadow;
+        public ClientImpl? client;
+        IDispatcher<CoreImpl> dispatcher = Protocol.Dispatcher.Dispatcher.Create<CoreImpl>();
+
         public ActorCore()
         {
+            client = null;
         }
 
-        public override void BindClient(ActorConnection client)
+        public override void BindClient(ActorConnection? connection)
         {
-            base.BindClient(client);
+            base.BindClient(connection);
             // reset the clint and shadow
+            if (connection == null)
+            {
+                client = null;
+                return;
+            }
+
+            ISender sender = new ClientSender(aid, connection);
+            client = Protocol.Sender.Sender.Create<ClientImpl>(sender);
+
+            OnClientBinded();
         }
 
-        public override void BecomePlayer()
+        public override void DispatchMessage(MemoryStream stream)
         {
+            BinaryReader reader = new BinaryReader(stream);
+            dispatcher.Dispatch((this as CoreImpl)!, reader);
         }
     }
 
@@ -73,6 +96,27 @@ namespace Server
         public ActorShadow()
         {
 
+        }
+    }
+
+    class ClientSender : ISender
+    {
+        ActorConnection connection;
+        ActorId aid;
+        public ClientSender(ActorId aid, ActorConnection con)
+        {
+            this.aid = aid;
+            this.connection = con;
+        }
+
+        public void Send(MemoryStream data)
+        {
+            connection.remote.ActorMessage(aid, data);
+        }
+
+        public void Close()
+        {
+            connection.client.Close();
         }
     }
 }

@@ -1,9 +1,5 @@
 ﻿
 using Microsoft.CodeAnalysis;
-using Microsoft.CodeAnalysis.CSharp;
-using Microsoft.CodeAnalysis.CSharp.Syntax;
-using System.Collections.Immutable;
-using System.Reflection;
 
 namespace ProtocolGenerator;
 
@@ -83,7 +79,6 @@ public class InterfaceInfo
     {
         InterfaceInfo info = new InterfaceInfo();
 
-        // info.name = node.Identifier.Text;
         info.name = inter.Name;
 
         info.senderName = $"{info.name}_Sender";
@@ -127,18 +122,6 @@ public class InterfaceInfo
         var nameList = rpcIdDict.Keys.ToList();
         nameList.Sort();
 
-        //int rpcIdStart = 10;
-        //for (int index = 0; index < nameList.Count; ++index)
-        //{
-        //    int oldId = rpcIdDict[nameList[index]];
-        //    int rpcId = rpcIdStart + index;
-
-        //    if (oldId != 0)
-        //    {
-        //        rpcId = oldId;
-        //    }
-        //    rpcIdDict[nameList[index]] = rpcId;
-        //}
         int nextRpcId = 10;
         for (int index = 0; index < nameList.Count; ++index)
         {

@@ -88,17 +88,6 @@ public class DispatcherBuilder
 
     void AddMethodCase(MethodInfo method, Indent indent)
     {
-        //case 2:
-        //{
-        //    string msg = ((Func<string>)(() => {
-        //        int len = reader.ReadInt32();
-        //        byte[] data = reader.ReadBytes(len);
-
-        //        return Encoding.Unicode.GetString(data);
-        //    }))();
-        //    ins.Echo(msg);
-        //    break;
-        //}
         Indent nextIndent = indent.Next();
         AddCaseBegin(method, indent);
 
@@ -176,11 +165,6 @@ public class DispatcherBuilder
 
     void AddDefaultCase(Indent indent)
     {
-        //default:
-        //        {
-        //    Console.WriteLine($"invalid rpcId: {rpcId}");
-        //    break;
-        //}
         Indent nextIndent = indent.Next();
         AppendLine("default:", indent);
         AppendLine("{", indent);
@@ -191,11 +175,6 @@ public class DispatcherBuilder
 
     void AddDispatcherBegin(Indent indent)
     {
-        //        public static void Dispatch(Protocol.ILoginClient ins, BinaryReader reader)
-        //{
-        //    int rpcId = reader.ReadInt32();
-        //    switch (rpcId)
-
         Indent nextIndent = indent.Next();
         string interfaceType = info.name;
         AppendLine($"public void Dispatch({info.name} instance, BinaryReader reader)", indent);
@@ -228,9 +207,6 @@ public class DispatcherBuilder
 
     static void UnpackMemoryStream(StringBuilder builder, string prefix, ParameterInfo info)
     {
-        //long size = reader.BaseStream.Length - reader.BaseStream.Position;
-        //MemoryStream stream = new MemoryStream(reader.ReadBytes((int)size));
-        //return stream;
         builder.AppendLine(prefix + "long size = reader.BaseStream.Length - reader.BaseStream.Position;");
         builder.AppendLine(prefix + "return new MemoryStream(reader.ReadBytes((int)size));");
     }
@@ -240,10 +216,6 @@ public class DispatcherBuilder
         builder.AppendLine(prefix + "int len = reader.ReadInt32();");
         builder.AppendLine(prefix + "byte[] data = reader.ReadBytes(len);");
         builder.AppendLine(prefix + "return Encoding.Unicode.GetString(data);");
-        //int len = reader.ReadInt32();
-        //byte[] data = reader.ReadBytes(len);
-
-        //return Encoding.Unicode.GetString(data);
     }
 
     static void UnpackBool(StringBuilder builder, string prefix, ParameterInfo info)
@@ -253,8 +225,6 @@ public class DispatcherBuilder
 
     static void UnpackActorId(StringBuilder builder, string prefix,ParameterInfo info)
     {
-        //long value = reader.ReadInt64();
-        //return new ActorId(value);
         builder.AppendLine(prefix + "long value = reader.ReadInt64();");
         builder.AppendLine(prefix + "return new Common.ActorId(value);");
     }

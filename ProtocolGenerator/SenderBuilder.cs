@@ -46,24 +46,6 @@ public class SenderBuilder
         return SourceText.From(builder.ToString(), Encoding.Unicode);
     }
 
-    //string BeautifyCode()
-    //{
-    //    string source = builder.ToString();
-
-    //    var syntaxTree = CSharpSyntaxTree.ParseText(source);
-    //    var root = syntaxTree.GetRoot();
-
-    //    // 使用格式化器美化代码
-    //    var workspace = new AdhocWorkspace();
-    //    var optionSet = workspace.Options;
-
-    //    root.NormalizeWhitespace();
-
-    //    var formattedRoot = Formatter.Format(root, workspace);
-
-    //    return formattedRoot.ToFullString();
-    //}
-
     void AddUsing()
     {
         builder.AppendLine("using Common;");
@@ -80,13 +62,6 @@ public class SenderBuilder
 
     void AddClassBegin(Indent indent)
     {
-        //public class ILoginClient : Protocol.ILoginClient
-        //    {
-        //        ISender sender;
-        //        public ILoginClient(ISender sender)
-        //        {
-        //            this.sender = sender;
-        //        }
         Indent memberIndent = indent.Next();
         Indent contentIdent = memberIndent.Next();
 
@@ -115,21 +90,6 @@ public class SenderBuilder
         builder.AppendLine("}");
     }
 
-    //public void EchoBack(string msg)
-    //{
-    //    MemoryStream stream = new MemoryStream();
-    //    int rpcId = 3;
-    //    var npcIdData = BitConverter.GetBytes(rpcId);
-    //    stream.Write(npcIdData);
-    //    {
-    //        var rawData = MemoryMarshal.AsBytes(msg.AsSpan());
-    //        byte[] lenData = BitConverter.GetBytes((int)rawData.Length);
-    //        stream.Write(lenData);
-    //        stream.Write(rawData);
-    //    }
-    //    sender.Send(stream);
-    //}
-
     void AddMethod(MethodInfo method, Indent ident)
     {
         AddMethodBegin(method, ident);
@@ -144,12 +104,6 @@ public class SenderBuilder
 
     void AddMethodBegin(MethodInfo method, Indent ident)
     {
-        //    public void EchoBack(string msg)
-        //{
-        //    MemoryStream stream = new MemoryStream();
-        //    int rpcId = 3;
-        //    var npcIdData = BitConverter.GetBytes(rpcId);
-        //    stream.Write(npcIdData);
         string name = method.name;
         int rpcId = method.rpcId;
         string argumentString = BuildParameterString(method);
@@ -184,9 +138,7 @@ public class SenderBuilder
 
     void AddMethodEnd(MethodInfo method, Indent ident)
     {
-        //    sender.Send(stream);
-        //}
-        AppendLine("sender.Send(stream);", ident.Next());
+         AppendLine("sender.Send(stream);", ident.Next());
         AppendLine("}", ident);
     }
 
@@ -218,9 +170,6 @@ public class SenderBuilder
         {
             builder.AppendLine($"\"Invalid Type: {typeName}\"");
         }
-
-        //var action = packers[typeName];
-        //action!(builder, name);
     }
 
     void PreparePackers()
@@ -253,8 +202,6 @@ public class SenderBuilder
 
     static void PackActorId(StringBuilder builder, string prefix, string name)
     {
-        //byte[] rawData = BitConverter.GetBytes(aid.value);
-        //stream.Write(rawData);
         builder.AppendLine(prefix + $"byte[] rawData = BitConverter.GetBytes({name}.value);");
         builder.AppendLine(prefix + "stream.Write(rawData);");
     }

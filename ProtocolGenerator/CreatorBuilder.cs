@@ -18,26 +18,6 @@ class CreatorBuilder
         this.infos = infos;
     }
 
-    //public static void Build(SourceProductionContext context, List<InterfaceInfo> infos)
-    //{
-    //    CreatorBuilder builder = new CreatorBuilder(infos);
-
-    //    SourceText source = builder.GenerateSource();
-
-    //    string name = "ProtocolCreator.g.cs";
-
-    //    context.AddSource(name, source);
-
-    //}
-
-    //public SourceText GenerateSource()
-    //{
-    //    GenerateSenderCreator();
-    //    GenerateDispatcherCreator();
-
-    //    return SourceText.From(builder.ToString(), Encoding.Unicode);
-    //}
-
     public static void BuildSenderCreator(string containingNameSpace, 
             SourceProductionContext context, List<InterfaceInfo> infos)
     {
@@ -76,27 +56,6 @@ class CreatorBuilder
         builder.AppendLine(text);
     }
 
-    
-//using Common;
-
-//namespace Protocol.Sender;
-
-//public class Sender
-//{
-//    public static T Create<T>(ISender sender)
-//    {
-//        if (typeof(T) == typeof(IChatClient))
-//        {
-//            return (T)(object)new IChatClient_Sender(sender);
-//        }
-//        else if (typeof(T) == typeof(ILoginClient))
-//        {
-//            return (T)(object)new ILoginClient_Sender(sender);
-//        }
-
-//        throw new NotImplementedException();
-//    }
-//}
     void GenerateSenderCreator()
     {
         Indent indent1 = new Indent(1);
@@ -119,14 +78,6 @@ class CreatorBuilder
 
     void AddCreators(Indent indent)
     {
-        // if (typeof(T) == typeof(IChatClient))
-        //        {
-        //            return (T)(object)new IChatClient_Sender(sender);
-        //        }
-        //        else if (typeof(T) == typeof(ILoginClient))
-        //        {
-        //            return (T)(object)new ILoginClient_Sender(sender);
-        //        }
         bool needElse = false;
         foreach (InterfaceInfo info in infos)
         {
@@ -145,26 +96,6 @@ class CreatorBuilder
         }
     }
 
-//    using Common;
-
-//namespace Protocol.Dispatcher;
-
-//public class Dispatcher
-//{
-//    public static T Create<T>()
-//    {
-//        if (typeof(T) == typeof(ILoginClient))
-//        {
-//            return (T)(object)new ILoginClient_Dispatcher();
-//        }
-//        else if (typeof(T) == typeof(ILoginCore))
-//        {
-//            return (T)(object)new ILoginCore_Dispatcher();
-//        }
-
-//        throw new NotImplementedException();
-//    }
-//}
     void GenerateDispatcherCreator()
     {
         Indent indent1 = new Indent(1);

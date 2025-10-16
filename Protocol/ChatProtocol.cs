@@ -1,5 +1,4 @@
-﻿using Common;
-
+﻿
 namespace Protocol
 {
     [Common.Protocol]

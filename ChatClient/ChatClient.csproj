@@ -17,4 +17,8 @@
     <Compile Remove="Generated/**" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Actors\" />
+  </ItemGroup>
+
 </Project>

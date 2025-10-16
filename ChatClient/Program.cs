@@ -6,13 +6,6 @@ using System.Net.Sockets;
 
 namespace ChatClient
 {
-    public interface Hello
-    {
-        void SayHello(string msg, ActorId aid);
-        void Echo(string msg);
-        void EchoBack(string msg);
-    }
-
     internal class Program
     {
         static void Main(string[] args)
@@ -22,8 +15,6 @@ namespace ChatClient
             Init();
             
             ActorServices services = CreateActorServices();
-            // 
-
             var client = new Client<IBasicClient, IBasicServer>(services);
 
             client.Connect("127.0.0.1", 999);

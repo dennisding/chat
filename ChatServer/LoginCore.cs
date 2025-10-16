@@ -1,68 +1,19 @@
 ﻿
-using Common;
+
 using Server;
 using Protocol;
-using System.Net.Sockets;
-using System.Runtime.CompilerServices;
-using Services;
 
 namespace ChatServer
 {
-    class ClientSender : ISender
+    class LoginCore : ActorCore<ILoginClient, ILoginCore>, ILoginCore
     {
-        ActorConnection connection;
-        ActorId aid;
-        public ClientSender(ActorId aid, ActorConnection con)
-        {
-            this.aid = aid;
-            this.connection = con;
-        }
-
-        public void Send(MemoryStream data)
-        {
-            connection.remote.ActorMessage(aid, data);
-        }
-
-        public void Close()
-        {
-            connection.client.Close();
-        }
-    }
-
-    class LoginCore : Actor, ILoginCore // ActorCore<ILoginClient, IActorNull>
-    {
-        ILoginClient? client;
         public LoginCore(): base()
         {
         }
 
-        public override void EnterWorld(World _world)
+        public override void OnClientBinded()
         {
-            base.EnterWorld(_world);
-        }
-        public override void BindClient(ActorConnection con)
-        {
-            base.BindClient(con);
-
-            ClientSender sender = new ClientSender(aid, con);
-            //            client = new Protocol.Sender.ILoginClient_Sender(sender);
-            client = Protocol.Sender.Sender.Create<ILoginClient>(sender);
-
-            BecomePlayer();
-        }
-
-        public override void DispatchMessage(MemoryStream stream)
-        {
-            BinaryReader reader = new BinaryReader(stream);
-            //            Protocol.Dispatcher.ILoginCore_Dispatcher.Dispatch(this, reader);
-            var dispatcher = Protocol.Dispatcher.Dispatcher.Create<ILoginCore>();
-            dispatcher.Dispatch(this, reader);
-        }
-
-        public override void BecomePlayer()
-        {
-            base.BecomePlayer();
-            client!.Echo("msg from server!!!!");
+            client!.Echo("Message from LoginCore");
         }
 
         // impl ILoginCore

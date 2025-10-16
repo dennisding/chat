@@ -38,14 +38,4 @@ namespace Client
 
         }
     }
-
-    public class ActorClient<IServer>: Actor
-    {
-        public IServer? core;
-
-        public ActorClient()
-        {
-
-        }
-    }
 }

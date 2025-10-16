@@ -110,3 +110,24 @@
 //        }
 //    }
 //}
+
+//using Common;
+
+//namespace Protocol.Dispatcher;
+
+//public class Dispatcher
+//{
+//    public static T Create<T>()
+//    {
+//        if (typeof(T) == typeof(ILoginClient))
+//        {
+//            return (T)(object)new ILoginClient_Dispatcher();
+//        }
+//        else if (typeof(T) == typeof(ILoginCore))
+//        {
+//            return (T)(object)new ILoginCore_Dispatcher();
+//        }
+
+//        throw new NotImplementedException();
+//    }
+//}

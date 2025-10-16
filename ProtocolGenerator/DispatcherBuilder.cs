@@ -27,7 +27,7 @@ public class DispatcherBuilder
         DispatcherBuilder builder = new DispatcherBuilder(info);
 
         SourceText source = builder.GenerateSource();
-        string fileName = $"{info.name}_Dispatcher.g.cs";
+        string fileName = $"{info.dispatcherName}.g.cs";
         context.AddSource(fileName, source);
     }
 
@@ -48,6 +48,7 @@ public class DispatcherBuilder
     void AddUsing()
     {
         builder.AppendLine("using System.Text;");
+        builder.AppendLine("using Common;");
         builder.AppendLine();
     }
 
@@ -59,7 +60,8 @@ public class DispatcherBuilder
 
     void AddClassBegin()
     {
-        builder.AppendLine($"public class {info.name}_Dispatcher");
+        string className = info.dispatcherName;
+        builder.AppendLine($"public class {info.dispatcherName} : IDispatcher<{info.name}>");
         builder.AppendLine("{");
     }
 
@@ -196,7 +198,7 @@ public class DispatcherBuilder
 
         Indent nextIndent = indent.Next();
         string interfaceType = info.name;
-        AppendLine($"public static void Dispatch({info.name} instance, BinaryReader reader)", indent);
+        AppendLine($"public void Dispatch({info.name} instance, BinaryReader reader)", indent);
         AppendLine("{", indent);
         AppendLine("int rpcId = reader.ReadInt32();", nextIndent);
         AppendLine("switch (rpcId)", nextIndent);

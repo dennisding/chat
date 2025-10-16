@@ -2,6 +2,8 @@
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
+using System.Collections.Immutable;
+using System.Reflection;
 
 namespace ProtocolGenerator;
 
@@ -30,6 +32,7 @@ public class MethodInfo
         name = method.Name;
 
         BuildParameters(method);
+        ParseAttributes(method);
     }
 
     void BuildParameters(IMethodSymbol method)
@@ -44,12 +47,36 @@ public class MethodInfo
         }
     }
 
+    void ParseAttributes(IMethodSymbol method)
+    {
+        foreach (var attr in method.GetAttributes())
+        {
+            if (attr.AttributeClass!.Name != "Rpc")
+            {
+                continue;
+            }
+
+            int rpcId = 0;
+            foreach (var argument in attr.ConstructorArguments)
+            {
+                if (argument.Value is int id)
+                {
+                    rpcId = id;
+                }
+            }
+            this.rpcId = rpcId;
+        }
+    }
+
 }
 
 public class InterfaceInfo
 {
     public string name = "";
+    public string senderName = "";
+    public string dispatcherName = "";
     public string containingNamespace = "";
+    public string fullName = "";
     public List<MethodInfo> methods = new List<MethodInfo>();
 
     public static InterfaceInfo Build(INamedTypeSymbol inter)
@@ -58,6 +85,9 @@ public class InterfaceInfo
 
         // info.name = node.Identifier.Text;
         info.name = inter.Name;
+
+        info.senderName = $"{info.name}_Sender";
+        info.dispatcherName = $"{info.name}_Dispatcher";
 
         // add members
         foreach (var member in inter.GetMembers())
@@ -86,19 +116,42 @@ public class InterfaceInfo
     void GenerateRpcId()
     {
         Dictionary<string, int> rpcIdDict = new Dictionary<string, int>();
+        HashSet<int> idSet = new HashSet<int>();
+
         foreach (var method in methods)
         {
-            rpcIdDict.Add(method.name, 0);
+            rpcIdDict.Add(method.name, method.rpcId);
+            idSet.Add(method.rpcId);
         }
 
         var nameList = rpcIdDict.Keys.ToList();
         nameList.Sort();
 
-        int rpcIdStart = 10;
+        //int rpcIdStart = 10;
+        //for (int index = 0; index < nameList.Count; ++index)
+        //{
+        //    int oldId = rpcIdDict[nameList[index]];
+        //    int rpcId = rpcIdStart + index;
+
+        //    if (oldId != 0)
+        //    {
+        //        rpcId = oldId;
+        //    }
+        //    rpcIdDict[nameList[index]] = rpcId;
+        //}
+        int nextRpcId = 10;
         for (int index = 0; index < nameList.Count; ++index)
         {
-            int rpcId = rpcIdStart + index;
-
+            int rpcId = rpcIdDict[nameList[index]];
+            if (rpcId == 0)
+            { // get nextRpcId
+                while (idSet.Contains(nextRpcId))
+                {
+                    ++nextRpcId;
+                }
+                rpcId = nextRpcId;
+                ++nextRpcId;
+            }
             rpcIdDict[nameList[index]] = rpcId;
         }
 

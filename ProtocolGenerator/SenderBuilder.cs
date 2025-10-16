@@ -18,7 +18,7 @@ public class SenderBuilder
         SenderBuilder builder = new SenderBuilder(info);
 
         SourceText source = builder.GenerateSource();
-        string fileName = $"{info.name}_Sender.g.cs";
+        string fileName = $"{info.senderName}.g.cs";
         context.AddSource(fileName, source);
     }
 
@@ -91,7 +91,7 @@ public class SenderBuilder
         Indent contentIdent = memberIndent.Next();
 
         string name = info.name;
-        string className = $"{info.name}_Sender";
+        string className = info.senderName;
 
         AppendLine($"public class {className} : {name}", indent);
         AppendLine("{", indent);
@@ -247,8 +247,8 @@ public class SenderBuilder
 
     static void PackNumber(StringBuilder builder, string prefix, string name)
     {
-        builder.Append(prefix + $"byte[] data = BitConverter.GetBytes({name});");
-        builder.Append(prefix + "stream.Write(data);");
+        builder.AppendLine(prefix + $"byte[] data = BitConverter.GetBytes({name});");
+        builder.AppendLine(prefix + "stream.Write(data);");
     }
 
     static void PackActorId(StringBuilder builder, string prefix, string name)

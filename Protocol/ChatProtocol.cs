@@ -1,5 +1,8 @@
-﻿namespace Protocol
+﻿using Common;
+
+namespace Protocol
 {
+    [Common.Protocol]
     public interface ILoginClient
     {
         void LoginResult(bool isOk);
@@ -7,6 +10,7 @@
         void EchoBack(string msg);
     }
 
+    [Common.Protocol]
     public interface ILoginCore
     {
         void Login(string name, string password);

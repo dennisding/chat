@@ -44,10 +44,9 @@ namespace ChatServer
         {
             base.BindClient(con);
 
-            // send the client sender
             ClientSender sender = new ClientSender(aid, con);
-            // client = new Protocol.Sender.ILoginClient(sender);
-            client = new Protocol.Sender.ILoginClient_Sender(sender);
+            //            client = new Protocol.Sender.ILoginClient_Sender(sender);
+            client = Protocol.Sender.Sender.Create<ILoginClient>(sender);
 
             BecomePlayer();
         }
@@ -55,7 +54,9 @@ namespace ChatServer
         public override void DispatchMessage(MemoryStream stream)
         {
             BinaryReader reader = new BinaryReader(stream);
-            Protocol.Dispatcher.ILoginCore_Dispatcher.Dispatch(this, reader);
+            //            Protocol.Dispatcher.ILoginCore_Dispatcher.Dispatch(this, reader);
+            var dispatcher = Protocol.Dispatcher.Dispatcher.Create<ILoginCore>();
+            dispatcher.Dispatch(this, reader);
         }
 
         public override void BecomePlayer()
@@ -65,12 +66,10 @@ namespace ChatServer
         }
 
         // impl ILoginCore
-
         public void Login(string name, string password)
         {
             Console.WriteLine($"LoginCore.Login: {name}, {password}");
             client!.LoginResult(name == password);
-            //            this.client!.LoginResult(name == password);
         }
 
         public void Echo(string msg)
@@ -82,7 +81,6 @@ namespace ChatServer
         public void EchoBack(string msg)
         {
             Console.WriteLine($"LoginCore.EchoBack: {msg}");
-//            client!.Echo("msg from LoginCore");
         }
     }
 }

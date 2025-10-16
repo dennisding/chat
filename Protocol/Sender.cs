@@ -144,3 +144,24 @@
 //        sender.Send(stream);
 //    }
 //}
+
+//using Common;
+
+//namespace Protocol.Sender;
+
+//public class Sender
+//{
+//    public static T Create<T>(ISender sender)
+//    {
+//        if (typeof(T) == typeof(IChatClient))
+//        {
+//            return (T)(object)new IChatClient_Sender(sender);
+//        }
+//        else if (typeof(T) == typeof(ILoginClient))
+//        {
+//            return (T)(object)new ILoginClient_Sender(sender);
+//        }
+
+//        throw new NotImplementedException();
+//    }
+//}

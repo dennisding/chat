@@ -7,19 +7,26 @@ namespace Common
         void Send(MemoryStream _stream);
         void Close();
     }
+    public interface IDispatcher<T>
+    {
+        void Dispatch(T ins, BinaryReader reader);
+    }
 
     //public interface IDispatcher<T>
     //{
     //    void Dispatch(T obj, BinaryReader reader);
     //}
 
+    [Protocol]
     public interface IActorNull
     {
 
     }
 
+    [Protocol]
     public interface IBasicClient
     {
+        [Rpc(999)]
         void Echo(string msg);
         void EchoBack(string msg);
         void CreateActor(string name, ActorId aid);
@@ -27,6 +34,7 @@ namespace Common
         void ActorMessage(ActorId aid, MemoryStream msg);
     }
 
+    [Protocol]
     public interface IBasicServer
     {
         void Echo(string msg);

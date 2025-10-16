@@ -9,6 +9,14 @@ namespace ChatClient
         public LoginActor()
         {
         }
+
+        public override void OnClinetBinded()
+        {
+            string name = "dennis";
+            string password = "dennis";
+            core!.Login(name, password);
+        }
+
         public void LoginResult(bool isOk)
         {
             Console.WriteLine($"LoginActor.LoginResult: {isOk}");

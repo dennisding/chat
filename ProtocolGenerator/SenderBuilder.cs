@@ -62,8 +62,7 @@ public class SenderBuilder
 
     void AddClassBegin(Indent indent)
     {
-        Indent memberIndent = indent.Next();
-        Indent contentIdent = memberIndent.Next();
+        Indent indent1 = indent.Next();
 
         string name = info.name;
         string className = info.senderName;
@@ -71,11 +70,11 @@ public class SenderBuilder
         AppendLine($"public class {className} : {name}", indent);
         AppendLine("{", indent);
 
-        AppendLine("ISender sender;", memberIndent);
-        AppendLine($"public {className}(ISender sender)", memberIndent);
-        AppendLine("{", memberIndent);
-        AppendLine($"this.sender = sender;", memberIndent.Next());
-        AppendLine("}", memberIndent);
+        AppendLine("ISender sender;", indent1);
+        AppendLine($"public {className}(ISender sender)", indent1);
+        AppendLine("{", indent1);
+        AppendLine($"this.sender = sender;", indent1.Next());
+        AppendLine("}", indent1);
     }
 
     void AppendLine(string text, Indent ident)
@@ -138,7 +137,7 @@ public class SenderBuilder
 
     void AddMethodEnd(MethodInfo method, Indent ident)
     {
-         AppendLine("sender.Send(stream);", ident.Next());
+        AppendLine("sender.Send(stream);", ident.Next());
         AppendLine("}", ident);
     }
 

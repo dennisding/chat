@@ -1,10 +1,6 @@
 ﻿
 using Microsoft.CodeAnalysis;
-using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Text;
-using System.CodeDom.Compiler;
-using System.Net;
-using System.Security.Cryptography.X509Certificates;
 using System.Text;
 
 namespace ProtocolGenerator;

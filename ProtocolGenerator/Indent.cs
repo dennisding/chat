@@ -1,8 +1,4 @@
 ﻿
-
-using Microsoft.CodeAnalysis;
-using System.CodeDom.Compiler;
-
 namespace ProtocolGenerator;
 
 class Indent

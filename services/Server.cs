@@ -10,13 +10,11 @@ public class Server
     Dictionary<int, ConnectionInfo> connections;
     TcpListener? listener = null;
     IServices services;
-//    Dispatcher dispatcher;
     Channel<Message> channel;
 
     public Server(IServices services)
     {
         this.services = services;
-//        dispatcher = DispatcherBuilder.Build(typeof(TServer));
 
         connections = new Dictionary<int, ConnectionInfo>();
         channel = Channel.CreateUnbounded<Message>();
@@ -48,7 +46,6 @@ public class Server
 
                 Console.WriteLine($"Client Connected: {connectId}, {client.Client.RemoteEndPoint}");
 
-//                    IConnection connection = services.NewConnection(client);
                 ConnectionInfo info = new ConnectionInfo(connectId, client);
 
                 await channel.Writer.WriteAsync(Message.Connect(info));
@@ -129,7 +126,6 @@ public class Server
     {
         connections.Add(info.connectId, info);
 
-//        TClient remote = RemoteBuilder.Build<TClient>(info.clinet);
         info.connection = services.NewConnection(info.clinet);
         
         services.OnConnected(info.connection);
@@ -147,6 +143,5 @@ public class Server
         BinaryReader reader = new BinaryReader(stream);
 
         info.connection!.DispatchMessage(reader);
-//        dispatcher.Dispatch(info.connection!, reader);
     }
 }

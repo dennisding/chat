@@ -34,7 +34,6 @@ class ClientMessage
 public class Client
 {
     IClientServices services;
-//    Dispatcher dispatcher;
 
     TcpClient client;
     bool connected = false;
@@ -43,7 +42,6 @@ public class Client
     public Client(IClientServices service)
     {
         this.services = service;
-//        this.dispatcher = DispatcherBuilder.Build(typeof(TClient));
         this.client = new TcpClient();
         this.channel = Channel.CreateUnbounded<ClientMessage>();
     }
@@ -101,7 +99,6 @@ public class Client
 
     void OnConnected()
     {
-//        TServer remote = RemoteBuilder.Build<TServer>(client)!;
         services.OnConnected(client);
     }
 
@@ -121,8 +118,6 @@ public class Client
         MemoryStream stream = new MemoryStream(data);
         BinaryReader reader = new BinaryReader(stream);
 
-        // dispatch the method
-        //        dispatcher.Dispatch(services, reader);
         services.DispatchMessage(reader);
     }
 

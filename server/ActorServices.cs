@@ -51,7 +51,6 @@ namespace Server
         public ActorConnection(TcpClient client)
         {
             this.client = client;
-            //            this.remote = remote;
             ISender sender = new NetworkStreamSender(client.GetStream());
             this.remote = Common.Sender.Sender.Create<IBasicClient>(sender);
 

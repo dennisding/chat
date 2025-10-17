@@ -2,151 +2,151 @@
 using System.Net.Sockets;
 using System.Threading.Channels;
 
-namespace Services
+namespace Services;
+
+public class Server
 {
-    public class Server<IClient, IServer>
+    bool running = false;
+    Dictionary<int, ConnectionInfo> connections;
+    TcpListener? listener = null;
+    IServices services;
+//    Dispatcher dispatcher;
+    Channel<Message> channel;
+
+    public Server(IServices services)
     {
-        bool running = false;
-        Dictionary<int, ConnectionInfo> connections;
-        TcpListener? listener = null;
-        IServices<IClient> services;
-        Dispatcher dispatcher;
-        Channel<Message> channel;
+        this.services = services;
+//        dispatcher = DispatcherBuilder.Build(typeof(TServer));
 
-        public Server(IServices<IClient> services)
+        connections = new Dictionary<int, ConnectionInfo>();
+        channel = Channel.CreateUnbounded<Message>();
+    }
+
+    public void ServeForeverAt(int port)
+    {
+        Console.WriteLine($"ServeForeverAt: {port}");
+        listener = TcpListener.Create(port);
+        listener.Start();
+
+        running = true;
+
+        Task listen = Task.Run(Listen);
+        Task process = Task.Run(Process);
+
+        Task.WaitAll(listen, process);
+    }
+
+    async Task Listen()
+    {
+        int connectId = 100;
+
+        while (running)
         {
-            this.services = services;
-            dispatcher = DispatcherBuilder.Build(typeof(IServer));
-
-            connections = new Dictionary<int, ConnectionInfo>();
-            channel = Channel.CreateUnbounded<Message>();
-        }
-
-        public void ServeForeverAt(int port)
-        {
-            Console.WriteLine($"ServeForeverAt: {port}");
-            listener = TcpListener.Create(port);
-            listener.Start();
-
-            running = true;
-
-            Task listen = Task.Run(Listen);
-            Task process = Task.Run(Process);
-
-            Task.WaitAll(listen, process);
-        }
-
-        async Task Listen()
-        {
-            int connectId = 100;
-
-            while (running)
+            try
             {
-                try
-                {
-                    TcpClient client = await listener!.AcceptTcpClientAsync();
+                TcpClient client = await listener!.AcceptTcpClientAsync();
 
-                    Console.WriteLine($"Client Connected: {connectId}, {client.Client.RemoteEndPoint}");
+                Console.WriteLine($"Client Connected: {connectId}, {client.Client.RemoteEndPoint}");
 
 //                    IConnection connection = services.NewConnection(client);
-                    ConnectionInfo info = new ConnectionInfo(connectId, client);
+                ConnectionInfo info = new ConnectionInfo(connectId, client);
 
-                    await channel.Writer.WriteAsync(Message.Connect(info));
+                await channel.Writer.WriteAsync(Message.Connect(info));
 
-                    // crate new async function to read the data
-                    Task _ = Task.Run(() => HandleClientRead(info));
-                }
-                catch (Exception e)
-                {
-                    Console.WriteLine($"Server Error: {e}");
-                    running = false;
-                }
-
-                connectId++;
+                // crate new async function to read the data
+                Task _ = Task.Run(() => HandleClientRead(info));
             }
-        }
-
-        async void HandleClientRead(ConnectionInfo info)
-        {
-            byte[] lenBuffer = new byte[sizeof(int)];
-            NetworkStream stream = info.stream;
-            while (running)
+            catch (Exception e)
             {
-                try
-                {
-                    await stream.ReadExactlyAsync(lenBuffer);
-                    int len = BitConverter.ToInt32(lenBuffer);
-
-                    byte[] data = new byte[len];
-                    await stream.ReadExactlyAsync(data);
-
-                    await channel.Writer.WriteAsync(Message.DataReceived(info, data));
-                }
-                catch (Exception)
-                {
-                    await channel.Writer.WriteAsync(Message.Disconnect(info));
-                    info.clinet.Close();
-                    break;
-                }
+                Console.WriteLine($"Server Error: {e}");
+                running = false;
             }
-        }
 
-        async Task Process()
+            connectId++;
+        }
+    }
+
+    async void HandleClientRead(ConnectionInfo info)
+    {
+        byte[] lenBuffer = new byte[sizeof(int)];
+        NetworkStream stream = info.stream;
+        while (running)
         {
-            while (running)
+            try
             {
-                try
+                await stream.ReadExactlyAsync(lenBuffer);
+                int len = BitConverter.ToInt32(lenBuffer);
+
+                byte[] data = new byte[len];
+                await stream.ReadExactlyAsync(data);
+
+                await channel.Writer.WriteAsync(Message.DataReceived(info, data));
+            }
+            catch (Exception)
+            {
+                await channel.Writer.WriteAsync(Message.Disconnect(info));
+                info.clinet.Close();
+                break;
+            }
+        }
+    }
+
+    async Task Process()
+    {
+        while (running)
+        {
+            try
+            {
+                await foreach (var msg in channel.Reader.ReadAllAsync())
                 {
-                    await foreach (var msg in channel.Reader.ReadAllAsync())
-                    {
-                        DispatchMessage(msg);
-                    }
-                }
-                catch (Exception e)
-                {
-                    Console.WriteLine(e);
+                    DispatchMessage(msg);
                 }
             }
-        }
-
-        void DispatchMessage(Message msg)
-        {
-            if (msg.data != null)
+            catch (Exception e)
             {
-                OnDataReceived(msg.info!, msg.data);
-            }
-            else if (msg.netState == NetState.Connected)
-            {
-                OnConnected(msg.info!);
-            }
-            else if (msg.netState == NetState.Disconnected)
-            {
-                OnDisconnected(msg.info!);
+                Console.WriteLine(e);
             }
         }
+    }
 
-        void OnConnected(ConnectionInfo info)
+    void DispatchMessage(Message msg)
+    {
+        if (msg.data != null)
         {
-            connections.Add(info.connectId, info);
-
-            IClient remote = RemoteBuilder.Build<IClient>(info.clinet);
-            info.connection = services.NewConnection(info.clinet, remote);
-            
-            services.OnConnected(info.connection);
-            info.connection.OnConnected();
+            OnDataReceived(msg.info!, msg.data);
         }
-
-        void OnDisconnected(ConnectionInfo info)
+        else if (msg.netState == NetState.Connected)
         {
-            info.connection!.OnDisconnected();
+            OnConnected(msg.info!);
         }
-
-        void OnDataReceived(ConnectionInfo info, byte[] data)
+        else if (msg.netState == NetState.Disconnected)
         {
-            MemoryStream stream = new MemoryStream(data);
-            BinaryReader reader = new BinaryReader(stream);
-
-            dispatcher.Dispatch(info.connection!, reader);
+            OnDisconnected(msg.info!);
         }
+    }
+
+    void OnConnected(ConnectionInfo info)
+    {
+        connections.Add(info.connectId, info);
+
+//        TClient remote = RemoteBuilder.Build<TClient>(info.clinet);
+        info.connection = services.NewConnection(info.clinet);
+        
+        services.OnConnected(info.connection);
+        info.connection.OnConnected();
+    }
+
+    void OnDisconnected(ConnectionInfo info)
+    {
+        info.connection!.OnDisconnected();
+    }
+
+    void OnDataReceived(ConnectionInfo info, byte[] data)
+    {
+        MemoryStream stream = new MemoryStream(data);
+        BinaryReader reader = new BinaryReader(stream);
+
+        info.connection!.DispatchMessage(reader);
+//        dispatcher.Dispatch(info.connection!, reader);
     }
 }

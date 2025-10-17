@@ -9,9 +9,9 @@ namespace Services
         Disconnected,
     }
 
-    public interface IServices<RemoteType>
+    public interface IServices
     {
-        IConnection NewConnection(TcpClient client, RemoteType remote);
+        IConnection NewConnection(TcpClient client);
         void OnConnected(IConnection connection);
         void OnDisconnected(IConnection connection);
     }
@@ -20,11 +20,15 @@ namespace Services
     {
         void OnConnected();
         void OnDisconnected();
+
+        void DispatchMessage(BinaryReader data);
     }
 
-    public interface IClientServices<RemoteType>
+    public interface IClientServices
     {
-        void OnConnected(TcpClient client, RemoteType remote);
+        void OnConnected(TcpClient client);
         void OnDisconnected();
+
+        void DispatchMessage(BinaryReader reader);
     }
 }

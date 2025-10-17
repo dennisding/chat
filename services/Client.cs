@@ -3,156 +3,156 @@ using System.Net;
 using System.Net.Sockets;
 using System.Threading.Channels;
 
-namespace Services
+namespace Services;
+
+class ClientMessage
 {
-    class ClientMessage
+    public NetState state = NetState.None;
+    public byte[]? data = null;
+
+    public static ClientMessage Connect()
     {
-        public NetState state = NetState.None;
-        public byte[]? data = null;
+        ClientMessage msg = new ClientMessage();
+        msg.state = NetState.Connected;
+        return msg;
+    }
 
-        public static ClientMessage Connect()
+    public static ClientMessage Disconnect()
+    {
+        ClientMessage msg = new ClientMessage { state = NetState.Disconnected };
+        return msg;
+    }
+
+    public static ClientMessage DataReceived(byte[] data)
+    {
+        ClientMessage msg = new ClientMessage { data = data };
+
+        return msg;
+    }
+}
+
+public class Client
+{
+    IClientServices services;
+//    Dispatcher dispatcher;
+
+    TcpClient client;
+    bool connected = false;
+    Channel<ClientMessage> channel;
+
+    public Client(IClientServices service)
+    {
+        this.services = service;
+//        this.dispatcher = DispatcherBuilder.Build(typeof(TClient));
+        this.client = new TcpClient();
+        this.channel = Channel.CreateUnbounded<ClientMessage>();
+    }
+
+    public void Connect(string host, int port)
+    {
+
+        IPAddress addr = IPAddress.Parse(host);
+
+        Task.Run(() => HandleReadAsync(host, port));
+    }
+
+    public void Poll()
+    {
+        if (!connected)
         {
-            ClientMessage msg = new ClientMessage();
-            msg.state = NetState.Connected;
-            return msg;
+            return;
         }
-
-        public static ClientMessage Disconnect()
+        // process the read and write
+        try
         {
-            ClientMessage msg = new ClientMessage { state = NetState.Disconnected };
-            return msg;
+            while (channel.Reader.TryRead(out ClientMessage? msg))
+            {
+                try
+                {
+                    DispatchMessage(msg);
+                }
+                catch (Exception e)
+                {
+                    Console.WriteLine($"Dispatch Exception: {e}");
+                }
+            }
         }
-
-        public static ClientMessage DataReceived(byte[] data)
+        catch (Exception ex)
         {
-            ClientMessage msg = new ClientMessage { data = data };
-
-            return msg;
+            Console.WriteLine($"Poll Exception: {ex}");
         }
     }
 
-    public class Client<IClient, IServer>
+    void DispatchMessage(ClientMessage msg)
     {
-        IClientServices<IServer> services;
-        Dispatcher dispatcher;
-
-        TcpClient client;
-        bool connected = false;
-        Channel<ClientMessage> channel;
-
-        public Client(IClientServices<IServer> service)
+        if (msg.data != null)
         {
-            this.services = service;
-            this.dispatcher = DispatcherBuilder.Build(typeof(IClient));
-            this.client = new TcpClient();
-            this.channel = Channel.CreateUnbounded<ClientMessage>();
+            OnDataReceived(msg.data);
         }
-
-        public void Connect(string host, int port)
+        else if (msg.state == NetState.Connected)
         {
-
-            IPAddress addr = IPAddress.Parse(host);
-
-            Task.Run(() => HandleReadAsync(host, port));
+            OnConnected();
         }
-
-        public void Poll()
+        else if (msg.state == NetState.Disconnected)
         {
-            if (!connected)
-            {
-                return;
-            }
-            // process the read and write
-            try
-            {
-                while (channel.Reader.TryRead(out ClientMessage? msg))
-                {
-                    try
-                    {
-                        DispatchMessage(msg);
-                    }
-                    catch (Exception e)
-                    {
-                        Console.WriteLine($"Dispatch Exception: {e}");
-                    }
-                }
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine($"Poll Exception: {ex}");
-            }
+            OnDisconnected();
         }
+    }
 
-        void DispatchMessage(ClientMessage msg)
-        {
-            if (msg.data != null)
-            {
-                OnDataReceived(msg.data);
-            }
-            else if (msg.state == NetState.Connected)
-            {
-                OnConnected();
-            }
-            else if (msg.state == NetState.Disconnected)
-            {
-                OnDisconnected();
-            }
-        }
+    void OnConnected()
+    {
+//        TServer remote = RemoteBuilder.Build<TServer>(client)!;
+        services.OnConnected(client);
+    }
 
-        void OnConnected()
-        {
-            IServer remote = RemoteBuilder.Build<IServer>(client)!;
-            services.OnConnected(client, remote);
-        }
+    void OnDisconnected() 
+    {
+        connected = false;
+        services.OnDisconnected();
+    }
 
-        void OnDisconnected() 
+    void OnDataReceived(byte[] data)
+    {
+        if (data.Length == 0)
         {
             connected = false;
-            services.OnDisconnected();
+            return;
         }
+        MemoryStream stream = new MemoryStream(data);
+        BinaryReader reader = new BinaryReader(stream);
 
-        void OnDataReceived(byte[] data)
+        // dispatch the method
+        //        dispatcher.Dispatch(services, reader);
+        services.DispatchMessage(reader);
+    }
+
+    async Task HandleReadAsync(string host, int port)
+    {
+        try
         {
-            if (data.Length == 0)
-            {
-                connected = false;
-                return;
-            }
-            MemoryStream stream = new MemoryStream(data);
-            BinaryReader reader = new BinaryReader(stream);
+            IPAddress addr = IPAddress.Parse(host);
+            await client.ConnectAsync(addr, port);
+            connected = true;
 
-            // dispatch the method
-            dispatcher.Dispatch(services, reader);
+            await channel.Writer.WriteAsync(ClientMessage.Connect());
+
+            // read forever untill exception
+            byte[] lenBuffer = new byte[sizeof(int)];
+            NetworkStream stream = client.GetStream();
+            while (true)
+            {
+                await stream.ReadExactlyAsync(lenBuffer);
+
+                int len = BitConverter.ToInt32(lenBuffer);
+                byte[] data = new byte[len];
+                await stream.ReadExactlyAsync(data);
+
+                await channel.Writer.WriteAsync(ClientMessage.DataReceived(data));
+            }
         }
-
-        async Task HandleReadAsync(string host, int port)
+        catch (Exception) 
         {
-            try
-            {
-                IPAddress addr = IPAddress.Parse(host);
-                await client.ConnectAsync(addr, port);
-                connected = true;
-
-                await channel.Writer.WriteAsync(ClientMessage.Connect());
-
-                // read forever untill exception
-                byte[] lenBuffer = new byte[sizeof(int)];
-                NetworkStream stream = client.GetStream();
-                while (true)
-                {
-                    await stream.ReadExactlyAsync(lenBuffer);
-
-                    int len = BitConverter.ToInt32(lenBuffer);
-                    byte[] data = new byte[len];
-                    await stream.ReadExactlyAsync(data);
-
-                    await channel.Writer.WriteAsync(ClientMessage.DataReceived(data));
-                }
-            }
-            catch (Exception) 
-            {
-                await channel.Writer.WriteAsync(ClientMessage.Disconnect());
-            }
+            await channel.Writer.WriteAsync(ClientMessage.Disconnect());
         }
     }
 }

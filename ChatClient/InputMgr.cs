@@ -1,37 +1,36 @@
 ﻿
 using System.Threading.Channels;
 
-namespace ChatClient
+namespace ChatClient;
+
+class InputMgr
 {
-    class InputMgr
+    Channel<string> channel;
+    bool running = false;
+    public InputMgr()
     {
-        Channel<string> channel;
-        bool running = false;
-        public InputMgr()
-        {
-            running = true;
-            channel = Channel.CreateUnbounded<string>();
+        running = true;
+        channel = Channel.CreateUnbounded<string>();
 
-            Task.Run(HandleReadAsync);
+        Task.Run(HandleReadAsync);
+    }
+
+    public void Tick()
+    {
+        while (channel.Reader.TryRead(out string? line))
+        {
+            Console.WriteLine(line);
         }
+    }
 
-        public void Tick()
+    async Task HandleReadAsync()
+    {
+        while (running)
         {
-            while (channel.Reader.TryRead(out string? line))
+            string? line = await Console.In.ReadLineAsync();
+            if (line != null)
             {
-                Console.WriteLine(line);
-            }
-        }
-
-        async Task HandleReadAsync()
-        {
-            while (running)
-            {
-                string? line = await Console.In.ReadLineAsync();
-                if (line != null)
-                {
-                    await channel.Writer.WriteAsync(line);
-                }
+                await channel.Writer.WriteAsync(line);
             }
         }
     }

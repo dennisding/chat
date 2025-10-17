@@ -5,28 +5,27 @@ using Server;
 using Services;
 using Common;
 
-namespace ChatServer
+namespace ChatServer;
+
+internal class Program
 {
-    internal class Program
+    static void Main(string[] args)
     {
-        static void Main(string[] args)
-        {
-            Console.WriteLine("Hello, World server!");
+        Console.WriteLine("Hello, World server!");
 
-            Init();
+        Init();
 
-            ActorServices services = new ActorServices();
-            var server = new Server<IBasicClient, IBasicServer>(services);
+        ActorServices services = new ActorServices();
+        var server = new Services.Server(services);
 
-            server.ServeForeverAt(999);
-        }
+        server.ServeForeverAt(999);
+    }
 
-        static void Init()
-        {
-            Common.Initer.Init();
-            Server.Initer.Init();
+    static void Init()
+    {
+        Common.Initer.Init();
+        Server.Initer.Init();
 
-            Game.RegisterActor("Login", typeof(LoginCore));
-        }
+        Game.RegisterActor("Login", typeof(LoginCore));
     }
 }

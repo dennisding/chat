@@ -2,13 +2,12 @@
 using Common;
 using Client;
 
-namespace ChatClient
-{
-    //class ChatActor: ActorClient<IChatCore>
-    //{
-    //    ChatActor()
-    //    {
+namespace ChatClient;
 
-    //    }
-    //}
-}
+//class ChatActor: ActorClient<IChatCore>
+//{
+//    ChatActor()
+//    {
+
+//    }
+//}

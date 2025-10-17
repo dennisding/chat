@@ -12,11 +12,6 @@ namespace Common
         void Dispatch(T ins, BinaryReader reader);
     }
 
-    //public interface IDispatcher<T>
-    //{
-    //    void Dispatch(T obj, BinaryReader reader);
-    //}
-
     [Protocol]
     public interface IActorNull
     {

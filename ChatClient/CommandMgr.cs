@@ -1,11 +1,10 @@
 ﻿
-namespace ChatClient
-{
-    class CommandMgr
-    {
-        public CommandMgr()
-        {
+namespace ChatClient;
 
-        }
+class CommandMgr
+{
+    public CommandMgr()
+    {
+
     }
 }

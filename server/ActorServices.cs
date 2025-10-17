@@ -5,16 +5,16 @@ using System.Net.Sockets;
 
 namespace Server
 {
-    public class ActorServices : IServices<IBasicClient>, IBasicServer
+    public class ActorServices : IServices, IBasicServer
     {
         ActorId serviceId = Game.GenActorId();
         public ActorServices()
         {
         }
 
-        public IConnection NewConnection(TcpClient client, IBasicClient remote)
+        public IConnection NewConnection(TcpClient client)
         {
-            return new ActorConnection(client, remote);
+            return new ActorConnection(client);
         }
 
         public void OnConnected(IConnection con)
@@ -47,10 +47,15 @@ namespace Server
         public TcpClient client;
         public IBasicClient remote;
         ActorId aid;
-        public ActorConnection(TcpClient client, IBasicClient remote)
+        public IDispatcher<IBasicServer> dispatcher;
+        public ActorConnection(TcpClient client)
         {
             this.client = client;
-            this.remote = remote;
+            //            this.remote = remote;
+            ISender sender = new NetworkStreamSender(client.GetStream());
+            this.remote = Common.Sender.Sender.Create<IBasicClient>(sender);
+
+            dispatcher = Common.Dispatcher.Dispatcher.Create<IBasicServer>();
         }
 
         public void OnConnected()
@@ -83,6 +88,12 @@ namespace Server
             }
         }
 
+        public void DispatchMessage(BinaryReader data)
+        {
+            dispatcher.Dispatch(this, data);
+        }
+
+        // implement the protocol between client and server
         public void Echo(string msg)
         {
             Console.WriteLine($"Connection.Echo: {msg}");

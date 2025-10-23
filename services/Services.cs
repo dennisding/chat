@@ -11,6 +11,7 @@ namespace Services
 
     public interface IServices
     {
+        void OnReady() { }
         IConnection NewConnection(TcpClient client);
         void OnConnected(IConnection connection);
         void OnDisconnected(IConnection connection);

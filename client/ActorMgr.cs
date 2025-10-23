@@ -31,6 +31,19 @@ namespace Client
             return aid;
         }
 
+        public void DelActor(ActorId aid)
+        {
+            if (actors.TryGetValue(aid, out Actor? actor))
+            {
+                actor.Finit();
+                actors.Remove(aid);
+            }
+            else
+            {
+                Console.WriteLine($"Invalid ActorId: {aid}");
+            }
+        }
+
         public Actor? GetActor(ActorId aid)
         {
             if (actors.TryGetValue(aid, out Actor? actor))

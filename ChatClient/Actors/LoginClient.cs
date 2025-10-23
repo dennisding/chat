@@ -1,20 +1,21 @@
 ﻿
 using Protocol;
 using Client;
+using Common;
 
 namespace ChatClient;
 
-class LoginActor : ActorClient<ILoginClient, ILoginCore>, ILoginClient
+class LoginClient : ActorClient<ILoginClient, ILoginServer>, ILoginClient
 {
-    public LoginActor()
+    public LoginClient()
     {
     }
 
-    public override void OnClinetBinded()
+    public override void OnClientBinded()
     {
         string name = "dennis";
         string password = "dennis";
-        core!.Login(name, password);
+        server!.Login(name, password);
     }
 
     public void LoginResult(bool isOk)
@@ -25,7 +26,7 @@ class LoginActor : ActorClient<ILoginClient, ILoginCore>, ILoginClient
     public void Echo(string msg)
     {
         Console.WriteLine($"LoginActor.Echo: {msg}");
-        core!.EchoBack(msg);
+        server!.EchoBack(msg);
     }
 
     public void EchoBack(string msg)

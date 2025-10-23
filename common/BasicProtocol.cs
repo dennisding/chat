@@ -21,10 +21,10 @@ namespace Common
     [Protocol]
     public interface IBasicClient
     {
-        [Rpc(999)]
         void Echo(string msg);
         void EchoBack(string msg);
         void CreateActor(string name, ActorId aid);
+        void DelActor(ActorId aid);
         void BindClientTo(ActorId aid);
         void ActorMessage(ActorId aid, MemoryStream msg);
     }

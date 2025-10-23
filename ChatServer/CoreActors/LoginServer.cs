@@ -5,9 +5,9 @@ using Protocol;
 
 namespace ChatServer;
 
-class LoginCore : ActorCore<ILoginClient, ILoginCore>, ILoginCore
+class LoginServer : ActorServer<ILoginClient, ILoginServer>, ILoginServer
 {
-    public LoginCore(): base()
+    public LoginServer(): base()
     {
     }
 
@@ -20,7 +20,24 @@ class LoginCore : ActorCore<ILoginClient, ILoginCore>, ILoginCore
     public void Login(string name, string password)
     {
         Console.WriteLine($"LoginCore.Login: {name}, {password}");
-        client!.LoginResult(name == password);
+        bool result = name == password;
+        client!.LoginResult(result);
+        if (!result)
+        {
+            // login failed
+            DestroySelf();
+            return;
+        }
+
+        Game.CreateActor("Chat", OnChatterCreated);
+    }
+
+    void OnChatterCreated(Actor actor)
+    {
+        Console.WriteLine($"OnChatterCreated! {actor.aid}");
+
+        GiveClientTo(actor);
+        DestroySelf();
     }
 
     public void Echo(string msg)

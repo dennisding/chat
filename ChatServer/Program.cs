@@ -26,6 +26,18 @@ internal class Program
         Common.Initer.Init();
         Server.Initer.Init();
 
-        Game.RegisterActor("Login", typeof(LoginCore));
+        Config config = new Config();
+
+        Game.Init(config);
+
+        RegisterActors();
+    }
+
+    static void RegisterActors()
+    {
+        Game.RegisterActor("Core", typeof(ServerActor));
+        Game.RegisterActor("Login", typeof(LoginServer));
+        Game.RegisterActor("Chat", typeof(ChatServer));
+        Game.RegisterActor("Room", typeof(RoomServer));
     }
 }

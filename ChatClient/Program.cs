@@ -17,9 +17,13 @@ internal class Program
 
         client.Connect("127.0.0.1", 999);
 
+        CommandMgr command = new CommandMgr();
+
         while (true)
         {
             client.Poll();
+
+            command.Tick();
 
             Thread.Sleep(10);
         }
@@ -29,7 +33,8 @@ internal class Program
     {
         ActorServices services = new ActorServices();
 
-        services.AddActorType("Login", typeof(LoginActor));
+        services.AddActorType("Login", typeof(LoginClient));
+        services.AddActorType("Chat", typeof(ChatClient));
 
         return services;
     }

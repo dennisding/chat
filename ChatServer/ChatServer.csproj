@@ -13,9 +13,4 @@
     <ProjectReference Include="..\server\Server.csproj" />
   </ItemGroup>
 
-  <ItemGroup>
-    <Folder Include="CoreActors\" />
-    <Folder Include="ShadowActors\" />
-  </ItemGroup>
-
 </Project>

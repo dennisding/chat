@@ -27,6 +27,18 @@ namespace Server
             return null;
         }
 
+        public IEnumerable<T> GetActors<T>()
+        {
+            foreach (var actor in actors.Values)
+            {
+                T? result = (T?)(object?)actor;
+                if (result != null)
+                {
+                    yield return result;
+                }
+            }
+        }
+
         public void DelActor(ActorId aid)
         {
             Actor actor = actors[aid];
@@ -43,16 +55,17 @@ namespace Server
             ActorId aid = Game.GenActorId();
             Actor actor = (Actor)Activator.CreateInstance(types[name])!;
             actor.aid = aid;
+            actor.typeName = name;
 
             actors[aid] = actor;
 
             return actor;
         }
 
-        public ActorId CreateActor(string name, Action<string, ActorId, Actor> createCallback)
+        public ActorId CreateActor(string name, Action<Actor> createCallback)
         {
             Actor actor = CreateActor(name);
-            createCallback(name, actor.aid, actor);
+            createCallback(actor);
 
             return actor.aid;
         }

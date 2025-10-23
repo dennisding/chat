@@ -32,7 +32,7 @@ namespace Client
             this.services = services;
         }
 
-        public virtual void OnClinetBinded()
+        public virtual void OnClientBinded()
         {
         }
 
@@ -46,7 +46,7 @@ namespace Client
         where ServerImpl: class
         where ClientImpl : class
     {
-        public ServerImpl? core;
+        public ServerImpl? server;
         IDispatcher<ClientImpl> dispatcher = Protocol.Dispatcher.Dispatcher.Create<ClientImpl>();
 
         public ActorClient()
@@ -60,14 +60,14 @@ namespace Client
 
             if (services == null)
             {
-                core = null;
+                server = null;
                 return;
             }
 
             ISender sender = new ActorSender(aid, services);
-            core = Protocol.Sender.Sender.Create<ServerImpl>(sender);
+            server = Protocol.Sender.Sender.Create<ServerImpl>(sender);
 
-            OnClinetBinded();
+            OnClientBinded();
         }
 
         public override void DispatchMessage(BinaryReader reader)

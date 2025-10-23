@@ -26,3 +26,17 @@ public class NetworkStreamSender : ISender
         stream.Close();
     }
 }
+
+public class VisitorSender : ISender
+{
+    public MemoryStream? data;
+
+    public void Send(MemoryStream data)
+    {
+        this.data = data;
+    }
+
+    public void Close()
+    {
+    }
+}

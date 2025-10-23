@@ -12,6 +12,7 @@ public class ActorServices : IClientServices, IBasicClient
 
     ActorId? currentActor;
     IDispatcher<IBasicClient> dispatcher;
+
     public ActorServices()
     {
         dispatcher = Common.Dispatcher.Dispatcher.Create<IBasicClient>();
@@ -70,6 +71,12 @@ public class ActorServices : IClientServices, IBasicClient
     {
         Console.WriteLine($"CreateActor:{name}, {aid}");
         Game.CreateActor(name, aid);
+    }
+
+    public void DelActor(ActorId aid)
+    {
+        Console.WriteLine($"DelActor: {aid}");
+        Game.DelActor(aid);
     }
 
     public void ActorMessage(ActorId aid, MemoryStream stream)

@@ -7,19 +7,22 @@ class InputMgr
 {
     Channel<string> channel;
     bool running = false;
-    public InputMgr()
+    CommandMgr commandMgr;
+
+    public InputMgr(CommandMgr commandMgr)
     {
         running = true;
         channel = Channel.CreateUnbounded<string>();
 
         Task.Run(HandleReadAsync);
+        this.commandMgr = commandMgr;
     }
 
     public void Tick()
     {
         while (channel.Reader.TryRead(out string? line))
         {
-            Console.WriteLine(line);
+            commandMgr.InputCommand(line);
         }
     }
 

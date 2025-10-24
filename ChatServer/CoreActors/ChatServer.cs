@@ -68,6 +68,10 @@ class ChatServer: ActorServer<IChatClient, IChatServer>, IChatServer
     {
         // lobby message
         Console.WriteLine($"LobbyMessage: {msg}");
+
+        var server = Game.GetServer<ServerActor>();
+        server.LobbyMessage(this.aid, this.name, msg);
+//      server.ActorMessage(this.aid, this.name, msg);
     }
 
     public void ClientMessage(string msg)

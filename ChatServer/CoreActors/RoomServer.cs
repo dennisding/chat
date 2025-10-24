@@ -61,15 +61,23 @@ class RoomServer : ActorServer<IActorNull, IRoomServer>, IRoomServer
         }
     }
 
-    public void ActorMessage(ActorId aid, string userName, string msg)
+    public void ActorMessage(ActorId senderId, string userName, string msg)
     {
         string result = $"[{userName}]:{msg}";
         foreach (var actorId in actors)
         {
-            var actor = Game.GetActor<IChatClient>(actorId);
+            var actor = Game.GetActor<IChatServer>(actorId);
+
+            // 给自己的消息
+            if (senderId == actorId)
+            {
+                actor!.ClientMessage($"[我]: {msg}");
+                continue;
+            }
+
             if (actor != null)
             {
-                actor.ShowMessage(msg);
+                actor.ClientMessage(result);
             }
         }
     }

@@ -61,10 +61,10 @@ public class ActorConnection: IConnection, IBasicServer
 
         this.aid = actor.aid;
 
-        this.remote.CreateActor(actor.typeName, aid);
+        //this.remote.CreateActor(actor.typeName, aid);
 
-        // bind the remote client
-        this.remote.BindClientTo(aid);
+        //// bind the remote client
+        //this.remote.BindClientTo(aid);
         // bind the actor client
         actor.BindClient(this);
     }

@@ -10,6 +10,7 @@ namespace ChatServer;
 class ChatServer: ActorServer<IChatClient, IChatServer>, IChatServer
 {
     public ActorId roomId;
+    string name = "";
 
     public override void Init()
     {
@@ -39,7 +40,7 @@ class ChatServer: ActorServer<IChatClient, IChatServer>, IChatServer
 
             room!.SetName(name);
 
-            room.Enter(this.aid);
+            room.Enter(this.aid, this.name);
             this.roomId = room.aid;
         });
     }
@@ -69,5 +70,10 @@ class ChatServer: ActorServer<IChatClient, IChatServer>, IChatServer
     public void ClientMessage(string msg)
     {
         client!.ShowMessage(msg);
+    }
+
+    public void SetName(string name)
+    {
+        this.name = name;
     }
 }

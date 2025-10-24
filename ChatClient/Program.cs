@@ -19,7 +19,7 @@ internal class Program
 
         CommandMgr command = new CommandMgr();
 
-        while (true)
+        while (Game.running)
         {
             client.Poll();
 
@@ -42,5 +42,7 @@ internal class Program
     static void Init()
     {
         Common.Initer.Init();
+
+        Game.Init();
     }
 }

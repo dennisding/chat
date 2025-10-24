@@ -10,7 +10,7 @@ public class ActorServices : IClientServices, IBasicClient
     public TcpClient? client;
     public IBasicServer? remote;
 
-    ActorId? currentActor;
+    ActorId currentActor = new ActorId();
     IDispatcher<IBasicClient> dispatcher;
 
     public ActorServices()
@@ -22,14 +22,14 @@ public class ActorServices : IClientServices, IBasicClient
     public void BindClientTo(ActorId aid)
     {
         Console.WriteLine($"BindClientTo: {aid}");
-        if (currentActor != null)
+        Actor? lastActor = Game.GetActor(currentActor!);
+        if (lastActor != null)
         {
-            Actor lastActor = Game.GetActor((ActorId)currentActor)!;
-            // unbind the client
             lastActor.BindClient(null);
         }
 
         currentActor = aid;
+        Game.SetPlayer(aid);
         Actor actor = Game.GetActor(aid)!;
         actor.BindClient(this);
     }

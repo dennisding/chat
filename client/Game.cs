@@ -8,16 +8,23 @@ namespace Client
         static ActorMgr actorMgr = new ActorMgr();
         static ActorId playerId;
 
+        public static bool running = false;
+
         public Game()
         {
         }
 
         public static void Init()
         {
-
+            running = true;
         }
 
-        public void SetPlayer(ActorId aid)
+        public static void Exist()
+        {
+            running = false;
+        }
+
+        public static void SetPlayer(ActorId aid)
         {
             playerId = aid;
         }

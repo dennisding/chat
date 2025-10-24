@@ -71,14 +71,14 @@ public class Actor
     }
 }
 
-public class ActorServer<ClientImpl, CoreImpl> : Actor
+public class ActorServer<ClientImpl, ServerImpl> : Actor
     where ClientImpl: class
-    where CoreImpl: class
+    where ServerImpl: class
 {
     public ClientImpl? client;
 
     ActorConnection? connection;
-    IDispatcher<CoreImpl> dispatcher = Protocol.Dispatcher.Dispatcher.Create<CoreImpl>();
+    IDispatcher<ServerImpl> dispatcher = Protocol.Dispatcher.Dispatcher.Create<ServerImpl>();
 
     public ActorServer()
     {
@@ -87,15 +87,23 @@ public class ActorServer<ClientImpl, CoreImpl> : Actor
 
     public override void BindClient(ActorConnection? con)
     {
-        base.BindClient(con);
         // reset the clint and shadow
         if (con == null)
         {
+            ClearActors();
+            base.BindClient(null);
+
             client = null;
             connection = null;
             OnClientUnbinded();
             return;
         }
+
+        // 绑定客户端之前的准备工作
+        con.remote.CreateActor(this.typeName, this.aid);
+        con.remote.BindClientTo(this.aid);
+
+        base.BindClient(con);
 
         ISender sender = new ClientSender(aid, con);
         client = Protocol.Sender.Sender.Create<ClientImpl>(sender);
@@ -104,10 +112,21 @@ public class ActorServer<ClientImpl, CoreImpl> : Actor
         OnClientBinded();
     }
 
+    public void ClearActors()
+    {
+        // 清除Actors和aoi内的信息, 需要进一步分析考虑
+        if (connection == null)
+        {
+            return;
+        }
+
+        connection.remote.DelActor(this.aid);
+    }
+
     public override void DispatchMessage(MemoryStream stream)
     {
         BinaryReader reader = new BinaryReader(stream);
-        dispatcher.Dispatch((this as CoreImpl)!, reader);
+        dispatcher.Dispatch((this as ServerImpl)!, reader);
     }
 
     public override void GiveClientTo(Actor actor)

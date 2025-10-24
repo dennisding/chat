@@ -17,7 +17,7 @@ class RoomServer : ActorServer<IActorNull, IRoomServer>, IRoomServer
         this.name = name;
     }
 
-    public void Enter(ActorId aid)
+    public void Enter(ActorId aid, string name)
     {
         Console.WriteLine($"EnterWorld! {aid}");
 
@@ -25,13 +25,13 @@ class RoomServer : ActorServer<IActorNull, IRoomServer>, IRoomServer
 
         IChatServer chatter = Game.GetActor<IChatServer>(aid)!;
 
-        OnChatterEntered(chatter);
+        OnChatterEntered(chatter, name);
     }
 
-    void OnChatterEntered(IChatServer chatter)
+    void OnChatterEntered(IChatServer chatter, string user_name)
     {
         // 给自己发送进入房间消息
-        string msg = $"你已经进入房间[{name}]";
+        string msg = $"你已经进入房间[{this.name}]";
         chatter.ClientMessage(msg);
         
         // 给其它人发送自己已经进入房间的消息
@@ -42,7 +42,7 @@ class RoomServer : ActorServer<IActorNull, IRoomServer>, IRoomServer
                 continue;
             }
 
-            string enterMsg = $"用户[未知]已经进入房间[{name}]";
+            string enterMsg = $"用户[{user_name}]已经进入房间[{this.name}]";
             var friend = Game.GetActor<IChatServer>(aid);
 
             friend!.ClientMessage(enterMsg);

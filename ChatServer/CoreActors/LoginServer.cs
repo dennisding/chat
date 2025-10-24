@@ -7,6 +7,7 @@ namespace ChatServer;
 
 class LoginServer : ActorServer<ILoginClient, ILoginServer>, ILoginServer
 {
+    string name = "";
     public LoginServer(): base()
     {
     }
@@ -29,11 +30,15 @@ class LoginServer : ActorServer<ILoginClient, ILoginServer>, ILoginServer
             return;
         }
 
+        this.name = name;
+
         Game.CreateActor("Chat", OnChatterCreated);
     }
 
     void OnChatterCreated(Actor actor)
     {
+        ChatServer chatter = (ChatServer)actor;
+
         Console.WriteLine($"OnChatterCreated! {actor.aid}");
 
         GiveClientTo(actor);

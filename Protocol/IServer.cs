@@ -9,6 +9,6 @@ namespace Protocol;
 public interface IServer
 {
 
-    void EnterLobby(ActorId aid);
+    void EnterLobby(ActorId aid, string uesrName);
     void LeaveLobby(ActorId aid);
 }

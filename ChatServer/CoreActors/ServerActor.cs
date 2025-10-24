@@ -26,10 +26,10 @@ class ServerActor : ActorServer<IActorNull, IServer>, IServer
         lobby = actor as IRoomServer;
     }
 
-    public void EnterLobby(ActorId aid)
+    public void EnterLobby(ActorId aid, string userName)
     {
         Console.WriteLine($"EnterLobby: {aid}");
-        lobby!.Enter(aid);
+        lobby!.Enter(aid, userName);
     }
 
     public void LeaveLobby(ActorId aid)

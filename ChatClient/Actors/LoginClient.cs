@@ -13,14 +13,23 @@ class LoginClient : ActorClient<ILoginClient, ILoginServer>, ILoginClient
 
     public override void OnClientBinded()
     {
-        string name = "dennis";
-        string password = "dennis";
-        server!.Login(name, password);
+        //string name = "dennis";
+        //string password = "dennis";
+        //server!.Login(name, password);
     }
 
     public void LoginResult(bool isOk)
     {
         Console.WriteLine($"LoginActor.LoginResult: {isOk}");
+        if (isOk)
+        {
+            Console.WriteLine("登录成功!");
+        }
+        else
+        {
+            Console.WriteLine("登录失败!");
+            Game.Exist();
+        }
     }
 
     public void Echo(string msg)

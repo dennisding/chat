@@ -89,11 +89,11 @@ class CommandMgr
         input.remain = input.remain.Trim();
         if (input.command == "new")
         {
-            NewRoom(input.remain);
+            NewRoom(input);
         }
         else if (input.command == "enter")
         {
-            EnterRoom(input.remain);
+            EnterRoom(input);
         }
         else if (input.command == "leave")
         {
@@ -105,21 +105,21 @@ class CommandMgr
         }
         else if (input.command == "to")
         {
-            To(input.remain);
+            To(input);
         }
         else if (input.command == "login")
         {
-            Login(input.remain);
+            Login(input);
         }
         else if (input.command == "msg")
         {
-            Msg(input.remain);
+            Msg(input);
         }
     }
 
-    public void NewRoom(string remain)
+    public void NewRoom(CommandInput command)
     {
-        string roomName = remain;
+        string roomName = command.remain;
         Console.WriteLine($"Create new room: {roomName}");
 
         var player = Game.GetPlayer<ChatClient>();
@@ -131,9 +131,9 @@ class CommandMgr
         player!.server!.NewRoom(roomName);
     }
 
-    public void EnterRoom(string remain)
+    public void EnterRoom(CommandInput command)
     {
-        Console.WriteLine($"EnterRoom: {remain}");
+        Console.WriteLine($"EnterRoom: {command.remain}");
 
         var player = Game.GetPlayer<ChatClient>();
     }
@@ -148,18 +148,28 @@ class CommandMgr
         Console.WriteLine($"Command.Quit");
     }
 
-    public void To(string remain)
+    public void To(CommandInput command)
     {
-        Console.WriteLine($"Command.To: {remain}");
+        Console.WriteLine($"Command.To: {command.remain}");
     }
 
-    public void Login(string remain)
+    public void Login(CommandInput command)
     {
+        string remain = command.remain;
         Console.WriteLine($"Command.Login: {remain}");
+        string[] tokens = remain.Split();
+
+        string username = tokens[0];
+        string password = tokens[1];
+
+        // var player = Game.GetPlayer<ChatClient>();
+        var player = Game.GetPlayer<LoginClient>();
+        player!.server!.Login(username, password);
     }
 
-    public void Msg(string remain)
+    public void Msg(CommandInput command)
     {
+        string remain = command.remain;
         Console.WriteLine($"Command.msg: {remain}");
 
         var player = Game.GetPlayer<ChatClient>();

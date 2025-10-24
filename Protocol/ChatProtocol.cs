@@ -17,11 +17,13 @@ public interface ILoginServer
     void EchoBack(string msg);
 }
 
+[Common.Protocol]
 public interface IChatClient
 {
     void ShowMessage(string msg);
 }
 
+[Common.Protocol]
 public interface IChatServer
 {
     void ShowMessage(string msg);

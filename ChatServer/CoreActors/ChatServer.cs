@@ -24,6 +24,9 @@ class ChatServer: ActorServer<IChatClient, IChatServer>, IChatServer
     public override void OnClientBinded()
     {
         base.OnClientBinded();
+        IServer server = Game.GetServer<IServer>();
+        server.EnterLobby(this.aid, this.name);
+
         client!.ShowMessage("I'am Ready");
     }
 
@@ -58,7 +61,7 @@ class ChatServer: ActorServer<IChatClient, IChatServer>, IChatServer
             return;
         }
 
-        room.ActorMessage(this.aid, msg);
+        room.ActorMessage(this.aid, this.name, msg);
     }
 
     void LobbyMessage(string msg)

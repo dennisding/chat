@@ -38,6 +38,7 @@ class LoginServer : ActorServer<ILoginClient, ILoginServer>, ILoginServer
     void OnChatterCreated(Actor actor)
     {
         ChatServer chatter = (ChatServer)actor;
+        chatter.SetName(this.name);
 
         Console.WriteLine($"OnChatterCreated! {actor.aid}");
 

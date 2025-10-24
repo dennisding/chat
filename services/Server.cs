@@ -31,6 +31,8 @@ public class Server
         Task listen = Task.Run(Listen);
         Task process = Task.Run(Process);
 
+        this.services.OnReady();
+
         Task.WaitAll(listen, process);
     }
 

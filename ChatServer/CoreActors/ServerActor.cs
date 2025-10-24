@@ -23,7 +23,10 @@ class ServerActor : ActorServer<IActorNull, IServer>, IServer
 
     void OnLobbyCreated(Actor actor)
     {
-        lobby = actor as IRoomServer;
+        var room = actor as RoomServer;
+        room!.SetName("大厅");
+//        lobby = actor as IRoomServer;
+        lobby = (IRoomServer)actor;
     }
 
     public void EnterLobby(ActorId aid, string userName)
@@ -37,5 +40,10 @@ class ServerActor : ActorServer<IActorNull, IServer>, IServer
         Console.WriteLine($"LeaveLobby: {aid}");
 
         lobby!.Leave(aid);
+    }
+
+    public void LobbyMessage(ActorId senderId, string userName, string msg)
+    {
+        lobby!.ActorMessage(senderId, userName, msg);
     }
 }

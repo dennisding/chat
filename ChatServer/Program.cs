@@ -35,7 +35,9 @@ internal class Program
 
     static void RegisterActors()
     {
-        Game.RegisterActor("Core", typeof(ServerActor));
+        // 服务器启动时会创建一个服务器Actor
+        Game.RegisterActor("Server", typeof(ServerActor));
+        // 建立连接是会有一个LoginActor
         Game.RegisterActor("Login", typeof(LoginServer));
         Game.RegisterActor("Chat", typeof(ChatServer));
         Game.RegisterActor("Room", typeof(RoomServer));

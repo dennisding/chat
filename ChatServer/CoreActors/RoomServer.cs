@@ -17,18 +17,18 @@ class RoomServer : ActorServer<IActorNull, IRoomServer>, IRoomServer
         this.name = name;
     }
 
-    public void Enter(ActorId aid, string name)
+    public void Enter(ActorId senderId, string name)
     {
-        Console.WriteLine($"EnterWorld! {aid}");
+        Console.WriteLine($"EnterWorld! {senderId}");
 
-        actors.Add(aid);
+        actors.Add(senderId);
 
-        IChatServer chatter = Game.GetActor<IChatServer>(aid)!;
+        IChatServer chatter = Game.GetActor<IChatServer>(senderId)!;
 
-        OnChatterEntered(chatter, name);
+        OnChatterEntered(chatter, senderId, name);
     }
 
-    void OnChatterEntered(IChatServer chatter, string user_name)
+    void OnChatterEntered(IChatServer chatter, ActorId senderId, string user_name)
     {
         // 给自己发送进入房间消息
         string msg = $"你已经进入房间[{this.name}]";
@@ -37,7 +37,7 @@ class RoomServer : ActorServer<IActorNull, IRoomServer>, IRoomServer
         // 给其它人发送自己已经进入房间的消息
         foreach (var aid in actors)
         {
-            if (aid == this.aid)
+            if (aid == senderId)
             {
                 continue;
             }
@@ -61,7 +61,16 @@ class RoomServer : ActorServer<IActorNull, IRoomServer>, IRoomServer
         }
     }
 
-    public void ActorMessage(ActorId aid, string msg)
+    public void ActorMessage(ActorId aid, string userName, string msg)
     {
+        string result = $"[{userName}]:{msg}";
+        foreach (var actorId in actors)
+        {
+            var actor = Game.GetActor<IChatClient>(actorId);
+            if (actor != null)
+            {
+                actor.ShowMessage(msg);
+            }
+        }
     }
 }

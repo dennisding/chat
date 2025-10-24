@@ -29,7 +29,7 @@ public class ActorServices : IServices
     {
         string actorType = Game.config.startActor;
         ActorId aid = Game.CreateActor(actorType);
-        Game.SetCoreId(aid);
+        Game.SetServerId(aid);
     }
 }
 
@@ -60,6 +60,8 @@ public class ActorConnection: IConnection, IBasicServer
         // bind the actor client
 
         this.aid = actor.aid;
+
+//        Game.SetServerId(actor.aid);
 
         //this.remote.CreateActor(actor.typeName, aid);
 

@@ -59,6 +59,8 @@ namespace Server
 
             actors[aid] = actor;
 
+            actor.Init();
+
             return actor;
         }
 

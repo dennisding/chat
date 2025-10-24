@@ -90,12 +90,12 @@ public class Game
         defaultActor = name;
     }
 
-    public static void SetCoreId(ActorId aid)
+    public static void SetServerId(ActorId aid)
     {
         coreId = aid;
     }
 
-    public static T GetCore<T>()
+    public static T GetServer<T>()
     {
         return Game.GetActor<T>(coreId)!;
     }

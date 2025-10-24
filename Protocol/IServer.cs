@@ -11,4 +11,5 @@ public interface IServer
 
     void EnterLobby(ActorId aid, string uesrName);
     void LeaveLobby(ActorId aid);
+    void LobbyMessage(ActorId senderId, string userName, string msg);
 }

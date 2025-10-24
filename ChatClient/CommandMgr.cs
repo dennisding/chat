@@ -146,6 +146,7 @@ class CommandMgr
     public void Quit()
     {
         Console.WriteLine($"Command.Quit");
+        Game.running = false;
     }
 
     public void To(CommandInput command)

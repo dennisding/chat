@@ -23,7 +23,7 @@ class ChatServer: ActorServer<IChatClient, IChatServer>, IChatServer
 
     public override void Finit()
     {
-        
+        Server.LeaveRoom(this.roomId, this.aid, this.name);
     }
 
     public override void OnClientBinded()
@@ -81,6 +81,7 @@ class ChatServer: ActorServer<IChatClient, IChatServer>, IChatServer
     public void LeaveRoom()
     {
         Console.WriteLine($"LeaveRoom");
+        Server.LeaveRoom(this.roomId, this.aid, this.name);
     }
 
     public void ChatMessage(string msg)

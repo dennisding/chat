@@ -84,9 +84,6 @@ class ServerActor : ActorServer<IActorNull, IServer>, IServer
             return;
         }
 
-        //        roomNames.Add(roomName);
-//        roomNames[roomName] = aid;
-
         Game.CreateActor("Room", (actor) =>
         {
             RoomServer room = (RoomServer)actor;
@@ -137,11 +134,19 @@ class ServerActor : ActorServer<IActorNull, IServer>, IServer
 
     public void LeaveRoom(ActorId roomId, ActorId aid, string userName)
     {
+        if (roomId == this.lobbyId)
+        {
+            SendMessage(aid, "不能退出[大厅]");
+            return;
+        }
+
         var room = Game.GetActor<IRoomServer>(roomId);
         if (room != null)
         {
             room.Leave(aid, userName);
         }
+
+        EnterLobby(aid, userName);
     }
 
     void SendMessage(ActorId aid, string msg)

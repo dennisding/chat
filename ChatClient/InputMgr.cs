@@ -30,6 +30,7 @@ class InputMgr
     {
         while (running)
         {
+//            Console.Write(":>");
             string? line = await Console.In.ReadLineAsync();
             if (line != null)
             {

@@ -62,7 +62,7 @@ public class Actor
 
     public virtual void DestroySelf()
     {
-        Game.DelActor(aid);
+//        Game.DelActor(aid);
     }
 
     public virtual void GiveClientTo(Actor actor)
@@ -114,12 +114,13 @@ public class ActorServer<ClientImpl, ServerImpl> : Actor
 
     public void ClearActors()
     {
-        // 清除Actors和aoi内的信息, 需要进一步分析考虑
+        // 清除Actors和aoi内的信息, 需要进一步考虑
         if (connection == null)
         {
             return;
         }
 
+        // del self and other entity in client!
         connection.remote.DelActor(this.aid);
     }
 

@@ -85,12 +85,14 @@ class ServerActor : ActorServer<IActorNull, IServer>, IServer
         }
 
         //        roomNames.Add(roomName);
-        roomNames[roomName] = aid;
+//        roomNames[roomName] = aid;
 
         Game.CreateActor("Room", (actor) =>
         {
             RoomServer room = (RoomServer)actor;
             room.SetName(roomName);
+
+            roomNames[roomName] = actor.aid;
             // new room created
             IChatServer? chatter = Game.GetActor<IChatServer>(aid);
             if (chatter != null)
@@ -118,7 +120,7 @@ class ServerActor : ActorServer<IActorNull, IServer>, IServer
             {
                 // enter the room
                 entered = true;
-                IRoomServer? room = Game.GetActor<IRoomServer>(aid);
+                IRoomServer? room = Game.GetActor<IRoomServer>(roomInfo.Value);
                 if (room != null)
                 {
                     room.Enter(aid, userName);
@@ -135,6 +137,11 @@ class ServerActor : ActorServer<IActorNull, IServer>, IServer
 
     public void LeaveRoom(ActorId roomId, ActorId aid, string userName)
     {
+        var room = Game.GetActor<IRoomServer>(roomId);
+        if (room != null)
+        {
+            room.Leave(aid, userName);
+        }
     }
 
     void SendMessage(ActorId aid, string msg)

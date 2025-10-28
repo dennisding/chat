@@ -22,7 +22,7 @@ namespace Client
         {
             if (actorTypes.TryGetValue(name, out Type? type))
             {
-                Console.WriteLine($"do Create Actors{name}");
+//                Console.WriteLine($"do Create Actors{name}");
                 Actor actor = (Actor)Activator.CreateInstance(type)!;
                 actor.aid = aid;
                 actors[aid] = actor;

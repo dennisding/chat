@@ -21,7 +21,7 @@ public class ActorServices : IClientServices, IBasicClient
 
     public void BindClientTo(ActorId aid)
     {
-        Console.WriteLine($"BindClientTo: {aid}");
+//        Console.WriteLine($"BindClientTo: {aid}");
         Actor? lastActor = Game.GetActor(currentActor!);
         if (lastActor != null)
         {
@@ -69,7 +69,7 @@ public class ActorServices : IClientServices, IBasicClient
 
     public void CreateActor(string name, ActorId aid)
     {
-        Console.WriteLine($"CreateActor:{name}, {aid}");
+//        Console.WriteLine($"CreateActor:{name}, {aid}");
         Game.CreateActor(name, aid);
     }
 

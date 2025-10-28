@@ -52,8 +52,8 @@ class ChatServer: ActorServer<IChatClient, IChatServer>, IChatServer
         if (isOk)
         {
             this.client!.ShowMessage("房间创建成功");
-            IRoomServer room = Game.GetActor<IRoomServer>(roomId)!;
-            room.Enter(this.aid, this.name);
+            //IRoomServer room = Game.GetActor<IRoomServer>(roomId)!;
+            //room.Enter(this.aid, this.name);
         }
         else
         {
@@ -74,6 +74,7 @@ class ChatServer: ActorServer<IChatClient, IChatServer>, IChatServer
         {
             Server.LeaveRoom(this.roomId, this.aid, this.name);
         }
+
         this.roomId = roomId;
     }
 

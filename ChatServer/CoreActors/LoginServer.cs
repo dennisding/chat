@@ -19,7 +19,7 @@ class LoginServer : ActorServer<ILoginClient, ILoginServer>, ILoginServer
 
     public override void OnClientBinded()
     {
-        client!.Echo("Message from LoginCore");
+//        client!.Echo("Message from LoginCore");
     }
 
     // impl ILoginCore
@@ -27,13 +27,6 @@ class LoginServer : ActorServer<ILoginClient, ILoginServer>, ILoginServer
     {
         Console.WriteLine($"LoginCore.Login: {name}, {password}");
         bool result = name == password;
-        //client!.LoginResult(result);
-        //if (!result)
-        //{
-        //    // login failed
-        //    DestroySelf();
-        //    return;
-        //}
         // 密码检查
         if (!result)
         {

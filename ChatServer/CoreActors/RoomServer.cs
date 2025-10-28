@@ -20,7 +20,7 @@ class RoomServer : ActorServer<IActorNull, IRoomServer>, IRoomServer
 
     public void Enter(ActorId senderId, string name)
     {
-        Console.WriteLine($"EnterWorld! {senderId}");
+//        Console.WriteLine($"EnterWorld! {senderId}");
 
         if (actors.Contains(senderId) )
         {
@@ -44,6 +44,7 @@ class RoomServer : ActorServer<IActorNull, IRoomServer>, IRoomServer
 
     void OnChatterEntered(IChatServer chatter, ActorId senderId, string userName)
     {
+        chatter.OnEnterRoom(this.aid);
         // 给自己发送进入房间消息
         string msg = $"你已经进入房间[{this.name}]";
         chatter.ClientMessage(msg);
@@ -55,22 +56,24 @@ class RoomServer : ActorServer<IActorNull, IRoomServer>, IRoomServer
 
     public void Leave(ActorId aid, string userName)
     {
-        Console.WriteLine($"LeaveWorld! {aid}");
+//        Console.WriteLine($"LeaveWorld! {aid}");
         actors.Remove(aid);
 
-        OnChatterLeave(userName);
+        OnChatterLeave(aid, userName);
 
-        if (actors.Count == 0 )
+        if ((this.name != "大厅") && (actors.Count == 0))
         {
             Console.WriteLine($"房间[{name}]已经销毁.");
             DestroySelf();
         }
     }
 
-    void OnChatterLeave(string userName)
+    void OnChatterLeave(ActorId senderId, string userName)
     {
+        SendMessage(senderId, $"你已经离开房间[{this.name}]");
+
         string msg = $"用户[{userName}]已经离开房间!";
-        BroadcastMessage(msg);
+        BroadcastMessage(msg, senderId);
     }
 
     void BroadcastMessage(string msg, ActorId senderId = new ActorId())

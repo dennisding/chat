@@ -123,7 +123,7 @@ class CommandMgr
     public void NewRoom(CommandInput command)
     {
         string roomName = command.remain.Trim();
-        Console.WriteLine($"Create new room: {roomName}");
+//        Console.WriteLine($"Create new room: {roomName}");
 
         var player = Game.GetPlayer<ChatClient>();
         if (player == null)

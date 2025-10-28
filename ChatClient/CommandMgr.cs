@@ -56,6 +56,11 @@ class CommandMgr
 
     HashSet<string> hasSubCommand;
 
+    ChatClient Player
+    {
+        get { return Game.GetPlayer<ChatClient>()!; }
+    }
+
     public CommandMgr()
     {
         inputMgr = new InputMgr(this);
@@ -77,8 +82,6 @@ class CommandMgr
 
     public void InputCommand(string command)
     {
-        Console.WriteLine($"InputCommand: {command}");
-        
         CommandInput input = new CommandInput(command);
 
         ProcessCommand(input);
@@ -119,7 +122,7 @@ class CommandMgr
 
     public void NewRoom(CommandInput command)
     {
-        string roomName = command.remain;
+        string roomName = command.remain.Trim();
         Console.WriteLine($"Create new room: {roomName}");
 
         var player = Game.GetPlayer<ChatClient>();
@@ -128,14 +131,16 @@ class CommandMgr
             Console.WriteLine("请先登录.");
             return;
         }
-        player!.server!.NewRoom(roomName);
+
+        player.CommandNewRoom(roomName);
+//        player!.server!.NewRoom(roomName);
     }
 
     public void EnterRoom(CommandInput command)
     {
-        Console.WriteLine($"EnterRoom: {command.remain}");
+        string roomName = command.remain.Trim();
+        Console.WriteLine($"EnterRoom: {roomName}");
 
-        var player = Game.GetPlayer<ChatClient>();
     }
 
     public void Leave()
@@ -165,15 +170,18 @@ class CommandMgr
 
         // var player = Game.GetPlayer<ChatClient>();
         var player = Game.GetPlayer<LoginClient>();
-        player!.server!.Login(username, password);
+        player!.CommandLogin(username, password);
+//        player!.server!.Login(username, password);
     }
 
     public void Msg(CommandInput command)
     {
         string remain = command.remain;
-        Console.WriteLine($"Command.msg: {remain}");
+//        Console.WriteLine($"Command.msg: {remain}");
 
-        var player = Game.GetPlayer<ChatClient>();
-        player!.server!.ChatMessage(remain);
+        Player.CommandChatMessage(remain.Trim());
+        //var player = Game.GetPlayer<ChatClient>();
+        //player!.server!.ChatMessage(remain);
+//        Player.server!.ChatMessage(remain);
     }
 }

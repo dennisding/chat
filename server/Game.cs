@@ -1,7 +1,9 @@
 ﻿
 //global using ActorId = long;
 
+using Common;
 using System.Runtime.CompilerServices;
+using Utils;
 
 namespace Server;
 
@@ -12,6 +14,9 @@ public class Game
     static ActorId coreId = new ActorId();
 
     public static Config config = new Config();
+
+    static MailboxMgr mailboxMgr = new MailboxMgr();
+    static Uuid serverId = Utils.Utils.GenUuid();
 
     public static void Init(Config? cfg = null)
     {
@@ -98,5 +103,28 @@ public class Game
     public static T GetServer<T>()
     {
         return Game.GetActor<T>(coreId)!;
+    }
+
+    // mailbox
+    public static void RegisterMailbox(Uuid serverId, IMailSender sender)
+    {
+        mailboxMgr.RegisterMailSender(serverId, sender);
+    }
+
+    public static void UnregisterMailbox(Uuid serverId)
+    {
+        mailboxMgr.UnregisterMailSender(serverId);
+    }
+
+    public static void Mail(Mailbox mailbox, MemoryStream stream)
+    {
+        if (mailbox.serverId == serverId)
+        {
+            // dispatch the message to actor!!
+        }
+        else
+        {
+            mailboxMgr.Mail(mailbox, stream);
+        }
     }
 }

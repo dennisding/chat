@@ -1,4 +1,6 @@
 ﻿
+using Common;
+
 namespace Protocol;
 
 [Common.Protocol]
@@ -15,6 +17,8 @@ public interface ILoginServer
     void Login(string name, string password);
     void Echo(string msg);
     void EchoBack(string msg);
+
+    void CheckUsernameResult(bool isOk);
 }
 
 [Common.Protocol]
@@ -29,6 +33,11 @@ public interface IChatServer
     void ShowMessage(string msg);
 
     void NewRoom(string name);
+    void NewRoomResult(bool isOk, ActorId roomId);
+    void EnterRoom(string name);
+    void OnEnterRoom(ActorId roomId);
+
+    void LeaveRoom();
 
     void ClientMessage(string msg);
     void ChatMessage(string msg);

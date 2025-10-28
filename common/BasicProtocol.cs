@@ -7,6 +7,12 @@ namespace Common
         void Send(MemoryStream _stream);
         void Close();
     }
+
+    public interface IMailSender
+    {
+        void Send(Mailbox mailbox, MemoryStream stream);
+    }
+
     public interface IDispatcher<T>
     {
         void Dispatch(T ins, BinaryReader reader);

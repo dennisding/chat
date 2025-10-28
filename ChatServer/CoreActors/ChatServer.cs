@@ -12,6 +12,11 @@ class ChatServer: ActorServer<IChatClient, IChatServer>, IChatServer
     public ActorId roomId;
     string name = "";
 
+    ServerActor Server
+    {
+        get { return Game.GetServer<ServerActor>(); }
+    }
+
     public override void Init()
     {
     }
@@ -24,8 +29,8 @@ class ChatServer: ActorServer<IChatClient, IChatServer>, IChatServer
     public override void OnClientBinded()
     {
         base.OnClientBinded();
-        IServer server = Game.GetServer<IServer>();
-        server.EnterLobby(this.aid, this.name);
+
+        Server.EnterLobby(this.aid, this.name);
 
         client!.ShowMessage("I'am Ready");
     }
@@ -38,14 +43,43 @@ class ChatServer: ActorServer<IChatClient, IChatServer>, IChatServer
     public void NewRoom(string name)
     {
         Console.WriteLine($"NewRoom: {name}");
-        Game.CreateActor("Room", (actor) => {
-            RoomServer? room = actor as RoomServer;
 
-            room!.SetName(name);
+        Server.NewRoom(this.aid, this.name, name);
+    }
 
+    public void NewRoomResult(bool isOk, ActorId roomId)
+    {
+        if (isOk)
+        {
+            this.client!.ShowMessage("房间创建成功");
+            IRoomServer room = Game.GetActor<IRoomServer>(roomId)!;
             room.Enter(this.aid, this.name);
-            this.roomId = room.aid;
-        });
+        }
+        else
+        {
+            this.client!.ShowMessage("无法创建房间");
+        }
+    }
+
+    public void EnterRoom(string roomName)
+    {
+        Console.WriteLine($"EnterRoom: {roomName}");
+
+        Server.EnterRoom(this.aid, this.name, roomName);
+    }
+
+    public void OnEnterRoom(ActorId roomId)
+    {
+        if (this.roomId != default)
+        {
+            Server.LeaveRoom(this.roomId, this.aid, this.name);
+        }
+        this.roomId = roomId;
+    }
+
+    public void LeaveRoom()
+    {
+        Console.WriteLine($"LeaveRoom");
     }
 
     public void ChatMessage(string msg)
@@ -69,9 +103,7 @@ class ChatServer: ActorServer<IChatClient, IChatServer>, IChatServer
         // lobby message
         Console.WriteLine($"LobbyMessage: {msg}");
 
-        var server = Game.GetServer<ServerActor>();
-        server.LobbyMessage(this.aid, this.name, msg);
-//      server.ActorMessage(this.aid, this.name, msg);
+        Server.LobbyMessage(this.aid, this.name, msg);
     }
 
     public void ClientMessage(string msg)

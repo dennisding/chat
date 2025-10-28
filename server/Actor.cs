@@ -7,13 +7,13 @@ public class Actor
 {
     public ActorId aid;
     public string typeName = "";
-    public World? world;
+//    public World? world;
     public ActorConnection? clientInfo;
 
-    public bool inWorld
-    {
-        get { return world != null; }
-    }
+    //public bool inWorld
+    //{
+    //    get { return world != null; }
+    //}
 
     public Actor()
     {
@@ -28,15 +28,15 @@ public class Actor
     {
     }
 
-    public virtual void EnterWorld(World _world)
-    {
-        world = _world;
-    }
+    //public virtual void EnterWorld(World _world)
+    //{
+    //    world = _world;
+    //}
 
-    public virtual void LeaveWorld()
-    {
-        world = null;
-    }
+    //public virtual void LeaveWorld()
+    //{
+    //    world = null;
+    //}
 
     public virtual void BindClient(ActorConnection? client)
     {

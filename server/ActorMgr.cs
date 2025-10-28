@@ -42,10 +42,10 @@ namespace Server
         public void DelActor(ActorId aid)
         {
             Actor actor = actors[aid];
-            if (actor.inWorld)
-            {
-                actor.LeaveWorld();
-            }
+            //if (actor.inWorld)
+            //{
+            //    actor.LeaveWorld();
+            //}
 
             actor.Finit();
         }

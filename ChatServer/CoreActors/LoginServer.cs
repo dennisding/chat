@@ -12,6 +12,11 @@ class LoginServer : ActorServer<ILoginClient, ILoginServer>, ILoginServer
     {
     }
 
+    ServerActor Server
+    {
+        get { return Game.GetServer<ServerActor>();}
+    }
+
     public override void OnClientBinded()
     {
         client!.Echo("Message from LoginCore");
@@ -22,17 +27,40 @@ class LoginServer : ActorServer<ILoginClient, ILoginServer>, ILoginServer
     {
         Console.WriteLine($"LoginCore.Login: {name}, {password}");
         bool result = name == password;
-        client!.LoginResult(result);
+        //client!.LoginResult(result);
+        //if (!result)
+        //{
+        //    // login failed
+        //    DestroySelf();
+        //    return;
+        //}
+        // 密码检查
         if (!result)
         {
-            // login failed
+            client!.LoginResult(false);
             DestroySelf();
             return;
         }
 
         this.name = name;
 
-        Game.CreateActor("Chat", OnChatterCreated);
+        Server.CheckUsername(this.aid, name);
+    }
+
+    public void CheckUsernameResult(bool isOk)
+    {
+        Console.WriteLine($"CheckUsernameResult: {isOk}");
+
+        client!.LoginResult(isOk);
+
+        if (isOk)
+        {
+            Game.CreateActor("Chat", OnChatterCreated);
+        }
+        else
+        {
+            DestroySelf();
+        }
     }
 
     void OnChatterCreated(Actor actor)

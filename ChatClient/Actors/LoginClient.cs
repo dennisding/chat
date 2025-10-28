@@ -42,4 +42,9 @@ class LoginClient : ActorClient<ILoginClient, ILoginServer>, ILoginClient
     {
         Console.WriteLine($"LoginActor.EchoBack: {msg}");
     }
+
+    public void CommandLogin(string userName, string password)
+    {
+        server!.Login(userName, password);
+    }
 }

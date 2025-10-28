@@ -11,6 +11,7 @@ class RoomServer : ActorServer<IActorNull, IRoomServer>, IRoomServer
 {
     string name = "";
     HashSet<ActorId> actors = new HashSet<Common.ActorId>();
+    const int MAX_NUMBER = 100;
 
     public void SetName(string name)
     {
@@ -21,6 +22,19 @@ class RoomServer : ActorServer<IActorNull, IRoomServer>, IRoomServer
     {
         Console.WriteLine($"EnterWorld! {senderId}");
 
+        if (actors.Contains(senderId) )
+        {
+            SendMessage(senderId, "请不要重复进入聊天室");
+            return;
+        }
+
+        if (actors.Count >= MAX_NUMBER)
+        {
+            SendMessage(senderId, "聊天室人数已满");
+            return;
+        }
+
+
         actors.Add(senderId);
 
         IChatServer chatter = Game.GetActor<IChatServer>(senderId)!;
@@ -28,31 +42,23 @@ class RoomServer : ActorServer<IActorNull, IRoomServer>, IRoomServer
         OnChatterEntered(chatter, senderId, name);
     }
 
-    void OnChatterEntered(IChatServer chatter, ActorId senderId, string user_name)
+    void OnChatterEntered(IChatServer chatter, ActorId senderId, string userName)
     {
         // 给自己发送进入房间消息
         string msg = $"你已经进入房间[{this.name}]";
         chatter.ClientMessage(msg);
-        
-        // 给其它人发送自己已经进入房间的消息
-        foreach (var aid in actors)
-        {
-            if (aid == senderId)
-            {
-                continue;
-            }
 
-            string enterMsg = $"用户[{user_name}]已经进入房间[{this.name}]";
-            var friend = Game.GetActor<IChatServer>(aid);
+        string enterMsg = $"用户[{userName}]已经进入房间[{this.name}]";
 
-            friend!.ClientMessage(enterMsg);
-        }
+        BroadcastMessage(enterMsg, senderId);
     }
 
-    public void Leave(ActorId aid)
+    public void Leave(ActorId aid, string userName)
     {
         Console.WriteLine($"LeaveWorld! {aid}");
         actors.Remove(aid);
+
+        OnChatterLeave(userName);
 
         if (actors.Count == 0 )
         {
@@ -61,24 +67,49 @@ class RoomServer : ActorServer<IActorNull, IRoomServer>, IRoomServer
         }
     }
 
-    public void ActorMessage(ActorId senderId, string userName, string msg)
+    void OnChatterLeave(string userName)
     {
-        string result = $"[{userName}]:{msg}";
-        foreach (var actorId in actors)
-        {
-            var actor = Game.GetActor<IChatServer>(actorId);
+        string msg = $"用户[{userName}]已经离开房间!";
+        BroadcastMessage(msg);
+    }
 
-            // 给自己的消息
-            if (senderId == actorId)
+    void BroadcastMessage(string msg, ActorId senderId = new ActorId())
+    {
+        foreach (var aid in actors)
+        {
+            if (aid == senderId)
             {
-                actor!.ClientMessage($"[我]: {msg}");
                 continue;
             }
+            var friend = Game.GetActor<IChatServer>(aid);
 
-            if (actor != null)
-            {
-                actor.ClientMessage(result);
-            }
+            friend!.ClientMessage(msg);
         }
+    }
+
+    void SendMessage(ActorId aid, string msg)
+    {
+        var chatter = Game.GetActor<IChatServer>(aid);
+        if (chatter != null)
+        {
+            chatter.ClientMessage(msg);
+        }
+    }
+
+    public void ActorMessage(ActorId senderId, string userName, string msg)
+    {
+        // send message to self
+        string selfMsg = $"[我]: {msg}";
+
+        IChatServer self = Game.GetActor<IChatServer>(senderId)!;
+        self.ClientMessage(selfMsg);
+
+        string broadcastMsg = $"[{userName}]:{msg}";
+        BroadcastMessage(broadcastMsg, senderId);
+    }
+
+    public string GetName()
+    {
+        return this.name;
     }
 }

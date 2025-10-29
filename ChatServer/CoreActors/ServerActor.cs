@@ -16,7 +16,7 @@ class ServerActor : ActorServer<IActorNull, IServer>, IServer
     // HashSet<string> roomNames = new HashSet<string>();
     Dictionary<string, ActorId> roomNames = new Dictionary<string, ActorId>();
 
-    Dictionary<string, IRoomServer> rooms = new Dictionary<string, IRoomServer>();
+//    Dictionary<string, IRoomServer> rooms = new Dictionary<string, IRoomServer>();
 
     public ServerActor()
     {
@@ -94,7 +94,7 @@ class ServerActor : ActorServer<IActorNull, IServer>, IServer
             IChatServer? chatter = Game.GetActor<IChatServer>(aid);
             if (chatter != null)
             {
-                rooms.Add(roomName, room);
+//                rooms.Add(roomName, room);
 
                 chatter.NewRoomResult(true, room.aid);
 
@@ -106,6 +106,12 @@ class ServerActor : ActorServer<IActorNull, IServer>, IServer
                 room.DestroySelf();
             }
         });
+    }
+
+    public void OnRoomDestroy(string name)
+    {
+        roomNames.Remove(name);
+//        rooms.Remove(name);
     }
 
     public void EnterRoom(ActorId aid, string userName, string roomName)

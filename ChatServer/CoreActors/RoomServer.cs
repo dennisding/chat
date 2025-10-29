@@ -14,6 +14,8 @@ class RoomServer : ActorServer<IActorNull, IRoomServer>, IRoomServer
     const int MAX_NUMBER = 100;
     bool isLobby = false;
 
+    ServerActor Server { get { return Game.GetServer<ServerActor>(); } }
+
     public void SetName(string name)
     {
         this.name = name;
@@ -69,6 +71,7 @@ class RoomServer : ActorServer<IActorNull, IRoomServer>, IRoomServer
         if (!this.isLobby && (actors.Count == 0))
         {
             Console.WriteLine($"房间[{name}]已经销毁.");
+            Server.OnRoomDestroy(this.name);
             DestroySelf();
         }
     }

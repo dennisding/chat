@@ -139,8 +139,11 @@ class CommandMgr
     public void EnterRoom(CommandInput command)
     {
         string roomName = command.remain.Trim();
-        Console.WriteLine($"EnterRoom: {roomName}");
+//        Console.WriteLine($"EnterRoom: {roomName}");
 
+        var player = Game.GetPlayer<ChatClient>();
+        player.CommandEnterRoom(roomName);
+//        player!.EnterRoom(roomName);
     }
 
     public void Leave()

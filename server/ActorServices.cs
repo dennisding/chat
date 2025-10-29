@@ -97,7 +97,6 @@ public class ActorConnection: IConnection, IBasicServer
 
     public void ActorMessage(ActorId aid, MemoryStream msg)
     {
-        Console.WriteLine($"Connection.ActorMessage: {aid}, {msg.Length}");
         Actor? actor = Game.GetActor(aid);
 
         actor!.DispatchMessage(msg);

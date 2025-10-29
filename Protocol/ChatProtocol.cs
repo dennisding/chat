@@ -35,7 +35,7 @@ public interface IChatServer
     void NewRoom(string name);
     void NewRoomResult(bool isOk, ActorId roomId);
     void EnterRoom(string name);
-    void OnEnterRoom(ActorId roomId);
+    void OnEnterRoom(ActorId roomId, bool isLobby);
 
     void LeaveRoom();
 

@@ -1,4 +1,6 @@
 ﻿
+using System.Diagnostics;
+
 namespace Utils;
 
 public class Utils
@@ -9,6 +11,15 @@ public class Utils
         long timeStamp = (int)DateTimeOffset.Now.ToUnixTimeSeconds();
         long rand = (int)Random.Shared.Next();
         return new Uuid((timeStamp << 32) | rand);
+    }
+
+    public static void PrintStack(string info = "")
+    {
+        StackTrace stackTrace = new StackTrace();
+        string callStack = stackTrace.ToString();
+
+        Console.WriteLine(info);
+        Console.WriteLine(callStack);
     }
 }
 

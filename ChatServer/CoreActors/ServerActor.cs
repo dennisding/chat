@@ -132,9 +132,9 @@ class ServerActor : ActorServer<IActorNull, IServer>, IServer
         }
     }
 
-    public void LeaveRoom(ActorId roomId, ActorId aid, string userName)
+    public void LeaveRoom(bool force, ActorId roomId, ActorId aid, string userName)
     {
-        if (roomId == this.lobbyId)
+        if ((!force) && (roomId == this.lobbyId))
         {
             SendMessage(aid, "不能退出[大厅]");
             return;
@@ -146,7 +146,7 @@ class ServerActor : ActorServer<IActorNull, IServer>, IServer
             room.Leave(aid, userName);
         }
 
-        EnterLobby(aid, userName);
+//        EnterLobby(aid, userName);
     }
 
     void SendMessage(ActorId aid, string msg)

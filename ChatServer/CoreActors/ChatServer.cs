@@ -23,7 +23,7 @@ class ChatServer: ActorServer<IChatClient, IChatServer>, IChatServer
 
     public override void Finit()
     {
-        Server.LeaveRoom(this.roomId, this.aid, this.name);
+        Server.LeaveRoom(true, this.roomId, this.aid, this.name);
     }
 
     public override void OnClientBinded()
@@ -40,11 +40,11 @@ class ChatServer: ActorServer<IChatClient, IChatServer>, IChatServer
         Console.WriteLine($"ChatCore.ShowMessage: {msg}");
     }
 
-    public void NewRoom(string name)
+    public void NewRoom(string roomName)
     {
-        Console.WriteLine($"NewRoom: {name}");
+        Console.WriteLine($"NewRoom: {roomName}");
 
-        Server.NewRoom(this.aid, this.name, name);
+        Server.NewRoom(this.aid, this.name, roomName);
     }
 
     public void NewRoomResult(bool isOk, ActorId roomId)
@@ -52,8 +52,6 @@ class ChatServer: ActorServer<IChatClient, IChatServer>, IChatServer
         if (isOk)
         {
             this.client!.ShowMessage("房间创建成功");
-            //IRoomServer room = Game.GetActor<IRoomServer>(roomId)!;
-            //room.Enter(this.aid, this.name);
         }
         else
         {
@@ -68,11 +66,13 @@ class ChatServer: ActorServer<IChatClient, IChatServer>, IChatServer
         Server.EnterRoom(this.aid, this.name, roomName);
     }
 
-    public void OnEnterRoom(ActorId roomId)
+    public void OnEnterRoom(ActorId roomId, bool isLobby)
     {
-        if (this.roomId != default)
+        ActorId oldRoom = this.roomId;
+        this.roomId = roomId;
+        if (!isLobby && (oldRoom != roomId))
         {
-            Server.LeaveRoom(this.roomId, this.aid, this.name);
+            Server.LeaveRoom(true, oldRoom, this.aid, this.name);
         }
 
         this.roomId = roomId;
@@ -81,7 +81,8 @@ class ChatServer: ActorServer<IChatClient, IChatServer>, IChatServer
     public void LeaveRoom()
     {
         Console.WriteLine($"LeaveRoom");
-        Server.LeaveRoom(this.roomId, this.aid, this.name);
+        Server.LeaveRoom(false, this.roomId, this.aid, this.name);
+        Server.EnterLobby(this.aid, this.name);
     }
 
     public void ChatMessage(string msg)

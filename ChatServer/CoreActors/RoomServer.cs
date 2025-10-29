@@ -12,10 +12,15 @@ class RoomServer : ActorServer<IActorNull, IRoomServer>, IRoomServer
     string name = "";
     HashSet<ActorId> actors = new HashSet<Common.ActorId>();
     const int MAX_NUMBER = 100;
+    bool isLobby = false;
 
     public void SetName(string name)
     {
         this.name = name;
+        if (name == "大厅")
+        {
+            isLobby = true;
+        }
     }
 
     public void Enter(ActorId senderId, string name)
@@ -44,7 +49,7 @@ class RoomServer : ActorServer<IActorNull, IRoomServer>, IRoomServer
 
     void OnChatterEntered(IChatServer chatter, ActorId senderId, string userName)
     {
-        chatter.OnEnterRoom(this.aid);
+        chatter.OnEnterRoom(this.aid, this.isLobby);
         // 给自己发送进入房间消息
         string msg = $"你已经进入房间[{this.name}]";
         chatter.ClientMessage(msg);
@@ -61,7 +66,7 @@ class RoomServer : ActorServer<IActorNull, IRoomServer>, IRoomServer
 
         OnChatterLeave(aid, userName);
 
-        if ((this.name != "大厅") && (actors.Count == 0))
+        if (!this.isLobby && (actors.Count == 0))
         {
             Console.WriteLine($"房间[{name}]已经销毁.");
             DestroySelf();

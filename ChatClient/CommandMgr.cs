@@ -145,7 +145,8 @@ class CommandMgr
 
     public void Leave()
     {
-        Console.WriteLine($"Command.Leave");
+        //Console.WriteLine($"Command.Leave");
+        Player.server!.LeaveRoom();
     }
 
     public void Quit()

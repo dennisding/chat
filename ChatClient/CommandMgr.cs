@@ -1,6 +1,5 @@
 ﻿
 using Client;
-using Protocol;
 
 namespace ChatClient;
 
@@ -66,7 +65,6 @@ class CommandMgr
         inputMgr = new InputMgr(this);
         hasSubCommand = new HashSet<string>();
 
-        // hashSubCommand
         RegisterSubCommands();
     }
 
@@ -102,7 +100,7 @@ class CommandMgr
         {
             Leave();
         }
-        else if (input.command == "quit")
+        else if (input.command == "quit" || input.command == "exit")
         {
             Quit();
         }
@@ -118,12 +116,15 @@ class CommandMgr
         {
             Msg(input);
         }
+        else if (input.command == "help")
+        {
+            HelpCommand();
+        }
     }
 
     public void NewRoom(CommandInput command)
     {
         string roomName = command.remain.Trim();
-//        Console.WriteLine($"Create new room: {roomName}");
 
         var player = Game.GetPlayer<ChatClient>();
         if (player == null)
@@ -133,22 +134,18 @@ class CommandMgr
         }
 
         player.CommandNewRoom(roomName);
-//        player!.server!.NewRoom(roomName);
     }
 
     public void EnterRoom(CommandInput command)
     {
         string roomName = command.remain.Trim();
-//        Console.WriteLine($"EnterRoom: {roomName}");
 
         var player = Game.GetPlayer<ChatClient>();
-        player.CommandEnterRoom(roomName);
-//        player!.EnterRoom(roomName);
+        player!.CommandEnterRoom(roomName);
     }
 
     public void Leave()
     {
-        //Console.WriteLine($"Command.Leave");
         Player.server!.LeaveRoom();
     }
 
@@ -160,7 +157,12 @@ class CommandMgr
 
     public void To(CommandInput command)
     {
-        Console.WriteLine($"Command.To: {command.remain}");
+//        Console.WriteLine($"Command.To: {command.remain}");
+        string userName = command.NextToken().Trim();
+        string msg = command.remain.Trim();
+
+        Player.CommandMessageTo(userName, msg);
+//        Console.WriteLine($"To [{userName}], [{msg}]");
     }
 
     public void Login(CommandInput command)
@@ -172,20 +174,26 @@ class CommandMgr
         string username = tokens[0];
         string password = tokens[1];
 
-        // var player = Game.GetPlayer<ChatClient>();
         var player = Game.GetPlayer<LoginClient>();
         player!.CommandLogin(username, password);
-//        player!.server!.Login(username, password);
     }
 
     public void Msg(CommandInput command)
     {
         string remain = command.remain;
-//        Console.WriteLine($"Command.msg: {remain}");
 
         Player.CommandChatMessage(remain.Trim());
-        //var player = Game.GetPlayer<ChatClient>();
-        //player!.server!.ChatMessage(remain);
-//        Player.server!.ChatMessage(remain);
+    }
+
+    public void HelpCommand()
+    {
+        Console.WriteLine("login {userName} {password}"); // login
+        Console.WriteLine("new {roomName}"); // new room 
+        Console.WriteLine("leave"); // leave
+        Console.WriteLine("enter {roomName}"); // enter roomname
+        Console.WriteLine("msg chat msg in room"); // chat message
+        Console.WriteLine("help"); // help
+        Console.WriteLine("exit|quit"); // exit the chat
+        Console.WriteLine("to {userName} {msg}");
     }
 }

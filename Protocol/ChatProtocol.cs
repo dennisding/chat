@@ -41,6 +41,8 @@ public interface IChatServer
 
     void ClientMessage(string msg);
     void ChatMessage(string msg);
+
+    void MessageTo(string userName, string msg);
 }
 
 public interface IChatShadow

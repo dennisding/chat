@@ -24,12 +24,14 @@ class ChatServer: ActorServer<IChatClient, IChatServer>, IChatServer
     public override void Finit()
     {
         Server.LeaveRoom(true, this.roomId, this.aid, this.name);
+        Server.OnUserLogout(this.aid, this.name);
     }
 
     public override void OnClientBinded()
     {
         base.OnClientBinded();
 
+        Server.OnUserLogin(this.aid, this.name);
         Server.EnterLobby(this.aid, this.name);
 
         client!.ShowMessage("I'am Ready");
@@ -112,6 +114,12 @@ class ChatServer: ActorServer<IChatClient, IChatServer>, IChatServer
     public void ClientMessage(string msg)
     {
         client!.ShowMessage(msg);
+    }
+
+    public void MessageTo(string userName, string msg)
+    {
+        string message = $"[{this.name}] {msg}";
+        Server.MessageTo(userName, message);
     }
 
     public void SetName(string name)

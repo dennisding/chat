@@ -17,4 +17,8 @@ public interface IServer
     void NewRoom(ActorId aid, string userName, string roomName);
     void EnterRoom(ActorId aid, string userName, string roomName);
     void LeaveRoom(bool force, ActorId roomId, ActorId aid, string userName);
+    void MessageTo(string receiverName, string msg);
+
+    void OnUserLogin(ActorId aid, string name);
+    void OnUserLogout(ActorId aid, string name);
 }

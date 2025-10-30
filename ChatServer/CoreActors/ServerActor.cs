@@ -9,14 +9,10 @@ namespace ChatServer;
 class ServerActor : ActorServer<IActorNull, IServer>, IServer
 {
 
-    // lobby
-    //    IRoomServer? lobby;
     ActorId lobbyId = default;
     HashSet<string> usernames = new HashSet<string>();
-    // HashSet<string> roomNames = new HashSet<string>();
     Dictionary<string, ActorId> roomNames = new Dictionary<string, ActorId>();
-
-//    Dictionary<string, IRoomServer> rooms = new Dictionary<string, IRoomServer>();
+    Dictionary<string, ActorId> userInfos = new Dictionary<string, ActorId>();
 
     public ServerActor()
     {
@@ -26,6 +22,16 @@ class ServerActor : ActorServer<IActorNull, IServer>, IServer
     public override void Init()
     {
         Game.CreateActor("Room", OnLobbyCreated);
+    }
+
+    public void OnUserLogin(ActorId aid, string userName)
+    {
+        userInfos[userName] = aid;
+    }
+
+    public void OnUserLogout(ActorId aid, string userName)
+    {
+        userInfos.Remove(userName);
     }
 
     void OnLobbyCreated(Actor actor)
@@ -38,9 +44,6 @@ class ServerActor : ActorServer<IActorNull, IServer>, IServer
 
     public void EnterLobby(ActorId aid, string userName)
     {
-        usernames.Add(userName);
-        //Console.WriteLine($"EnterLobby: {aid}");
-        //lobby!.Enter(aid, userName);
         IRoomServer? lobby = Game.GetActor<IRoomServer>(this.lobbyId);
 
         lobby!.Enter(aid, userName);
@@ -50,15 +53,12 @@ class ServerActor : ActorServer<IActorNull, IServer>, IServer
     {
         Console.WriteLine($"LeaveLobby: {aid}, {userName}");
 
-        this.usernames.Remove(userName);
-        //        lobby!.Leave(aid, userName);
         IRoomServer? lobby = Game.GetActor<IRoomServer>(this.lobbyId);
         lobby!.Leave(aid, userName);
     }
 
     public void LobbyMessage(ActorId senderId, string userName, string msg)
     {
-        //        lobby!.ActorMessage(senderId, userName, msg);
         var lobby = Game.GetActor<IRoomServer>(this.lobbyId);
         lobby!.ActorMessage(senderId, userName, msg);
     }
@@ -66,7 +66,7 @@ class ServerActor : ActorServer<IActorNull, IServer>, IServer
     public void CheckUsername(ActorId aid, string name)
     {
         bool isValid = true;
-        if (usernames.Contains(name))
+        if (userInfos.ContainsKey(name))
         {
             isValid = false;
         }
@@ -94,8 +94,6 @@ class ServerActor : ActorServer<IActorNull, IServer>, IServer
             IChatServer? chatter = Game.GetActor<IChatServer>(aid);
             if (chatter != null)
             {
-//                rooms.Add(roomName, room);
-
                 chatter.NewRoomResult(true, room.aid);
 
                 EnterRoom(aid, userName, roomName);
@@ -111,7 +109,6 @@ class ServerActor : ActorServer<IActorNull, IServer>, IServer
     public void OnRoomDestroy(string name)
     {
         roomNames.Remove(name);
-//        rooms.Remove(name);
     }
 
     public void EnterRoom(ActorId aid, string userName, string roomName)
@@ -151,8 +148,6 @@ class ServerActor : ActorServer<IActorNull, IServer>, IServer
         {
             room.Leave(aid, userName);
         }
-
-//        EnterLobby(aid, userName);
     }
 
     void SendMessage(ActorId aid, string msg)
@@ -161,6 +156,19 @@ class ServerActor : ActorServer<IActorNull, IServer>, IServer
         if (user != null)
         {
             user.ClientMessage(msg);
+        }
+    }
+
+    public void MessageTo(string receiverName, string msg)
+    {
+        Console.WriteLine($"msg to!!!{receiverName}, {userInfos}");
+        if (userInfos.TryGetValue(receiverName, out ActorId aid))
+        {
+            var receiver = Game.GetActor<IChatServer>(aid);
+            if (receiver != null)
+            {
+                receiver.ClientMessage(msg);
+            }
         }
     }
 }

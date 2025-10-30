@@ -33,4 +33,9 @@ class ChatClient : ActorClient<IChatClient, IChatServer>, IChatClient
     {
         server!.EnterRoom(roomName);
     }
+
+    public void CommandMessageTo(string userName, string msg)
+    {
+        server!.MessageTo(userName, msg);
+    }
 }

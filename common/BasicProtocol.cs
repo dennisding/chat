@@ -33,6 +33,7 @@ namespace Common
         void DelActor(ActorId aid);
         void BindClientTo(ActorId aid);
         void ActorMessage(ActorId aid, MemoryStream msg);
+        void ActorAttributeChanged(ActorId aid, int index, MemoryStream data);
     }
 
     [Protocol]

@@ -7,13 +7,7 @@ public class Actor
 {
     public ActorId aid;
     public string typeName = "";
-//    public World? world;
     public ActorConnection? clientInfo;
-
-    //public bool inWorld
-    //{
-    //    get { return world != null; }
-    //}
 
     public Actor()
     {
@@ -27,16 +21,6 @@ public class Actor
     public virtual void Finit()
     {
     }
-
-    //public virtual void EnterWorld(World _world)
-    //{
-    //    world = _world;
-    //}
-
-    //public virtual void LeaveWorld()
-    //{
-    //    world = null;
-    //}
 
     public virtual void BindClient(ActorConnection? client)
     {
@@ -62,12 +46,14 @@ public class Actor
 
     public virtual void DestroySelf()
     {
-//        Game.DelActor(aid);
     }
 
     public virtual void GiveClientTo(Actor actor)
     {
+    }
 
+    public virtual void AttributeChanged(AttributeFlag flag, int index, MemoryStream data)
+    {
     }
 }
 
@@ -137,6 +123,14 @@ public class ActorServer<ClientImpl, ServerImpl> : Actor
         BindClient(null);
 
         actor.BindClient(connection);
+    }
+
+    public override void AttributeChanged(AttributeFlag flag, int index, MemoryStream data)
+    {
+//        base.AttributeChanged(flag, index, data);
+        if ((flag & AttributeFlag.Client) != 0)
+        {
+        }
     }
 }
 

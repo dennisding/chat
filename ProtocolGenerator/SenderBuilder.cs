@@ -143,15 +143,21 @@ public class SenderBuilder
 
     void AddParameter(ParameterInfo parameter, Indent ident)
     {
+        // Common.Packer.PackInt(stream, intValue)
         builder.AppendLine();
 
-        AppendLine("{", ident);
+        string packer = PackerInfo.GetPackerName(parameter.typeName);
 
-        string name = parameter.name;
-        // add the packer
-        AddPacker(parameter.typeName, ident.Next(), parameter.name);
+        string packerString = $"{packer}(stream, {parameter.name});";
+        AppendLine(packerString, ident);
 
-        AppendLine("}", ident);
+        //AppendLine("{", ident);
+
+        //string name = parameter.name;
+        //// add the packer
+        //AddPacker(parameter.typeName, ident.Next(), parameter.name);
+
+        //AppendLine("}", ident);
     }
 
     void AddPacker(string typeName, Indent ident, string name)
@@ -176,6 +182,7 @@ public class SenderBuilder
         packers.Add("string", PackString);
         packers.Add("bool", PackNumber);
         packers.Add("Boolean", PackNumber);
+        packers.Add("int", PackNumber);
         packers.Add("Common.ActorId", PackActorId);
         packers.Add("System.IO.MemoryStream", PackMemoryStream);
     }

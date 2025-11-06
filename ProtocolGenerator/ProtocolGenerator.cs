@@ -11,6 +11,9 @@ public class ProtocolGenerator : IIncrementalGenerator
 {
     public void Initialize(IncrementalGeneratorInitializationContext context)
     {
+        // init the enviroment
+        PackerInfo.InitPacker();
+
         var provider = context.SyntaxProvider.CreateSyntaxProvider(IsInterfaceDeclaration, TransformInterface);
 
         var allClassProvider = provider.Collect();

@@ -17,3 +17,11 @@ public class Rpc : Attribute
         this.rpcId = rpcId;
     }
 }
+
+public enum AttributeFlag
+{
+    None = 0,
+    OwnerClient = 1,
+    OtherClient = 2,
+    Client = OwnerClient | OtherClient
+}

@@ -161,7 +161,6 @@ class ServerActor : ActorServer<IActorNull, IServer>, IServer
 
     public void MessageTo(string receiverName, string msg)
     {
-        Console.WriteLine($"msg to!!!{receiverName}, {userInfos}");
         if (userInfos.TryGetValue(receiverName, out ActorId aid))
         {
             var receiver = Game.GetActor<IChatServer>(aid);

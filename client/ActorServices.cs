@@ -81,9 +81,13 @@ public class ActorServices : IClientServices, IBasicClient
 
     public void ActorMessage(ActorId aid, MemoryStream stream)
     {
-//        Console.WriteLine($"ActorMessage: {aid}, {stream.Length}");
         Actor actor = Game.GetActor(aid)!;
         BinaryReader reader = new BinaryReader(stream);
         actor.DispatchMessage(reader);
+    }
+
+    public void ActorAttributeChanged(ActorId aid, int index, MemoryStream data)
+    {
+        Actor? actor = Game.GetActor(aid);
     }
 }

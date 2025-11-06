@@ -1,9 +1,8 @@
 ﻿
 using Server;
-using Common;
 using Protocol;
-using System.Net.Security;
-using System.Diagnostics;
+using Common.Sender;
+using System.Runtime.CompilerServices;
 
 namespace ChatServer;
 
@@ -12,6 +11,16 @@ class ChatServer: ActorServer<IChatClient, IChatServer>, IChatServer
     public ActorId roomId;
     string name = "";
 
+    int hp {
+        get
+        {
+            return hp;
+        }
+        set
+        {
+            hp = value;
+        }
+    }
     ServerActor Server
     {
         get { return Game.GetServer<ServerActor>(); }

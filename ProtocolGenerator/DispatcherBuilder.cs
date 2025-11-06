@@ -99,15 +99,25 @@ public class DispatcherBuilder
 
     void AddParameterUnpacker(ParameterInfo parameter, Indent indent)
     {
+        // {typeName} name = Common.Packer.UnpackInt(reader);
+
+
         string type = parameter.typeName;
         string name = parameter.name;
-        AppendLine($"{type} {name} = ((Func<{type}>)(() => {{", indent);
 
-        AddUnpacker(parameter, indent.Next());
+        string unpacker = PackerInfo.GetUnpackerName(type);
+        string result = $"{type} {name} = {unpacker}(reader);";
+        AppendLine(result, indent);
 
-        AppendLine("}))();", indent);
+        //string type = parameter.typeName;
+        //string name = parameter.name;
+        //AppendLine($"{type} {name} = ((Func<{type}>)(() => {{", indent);
+
+        //AddUnpacker(parameter, indent.Next());
+
+        //AppendLine("}))();", indent);
         
-        builder.AppendLine();
+        //builder.AppendLine();
     }
 
     void AddUnpacker(ParameterInfo parameter, Indent indent)

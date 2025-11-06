@@ -11,12 +11,23 @@ public class Packer
     public static void PackInt(MemoryStream stream, int value)
     {
         byte[] bytes = BitConverter.GetBytes(value);
-        stream.Write(bytes, 0, bytes.Length);
+        stream.Write(bytes);
     }
 
     public static int UnpackInt(BinaryReader reader)
     {
         return reader.ReadInt32();
+    }
+
+    public static void PackBool(MemoryStream stream, bool value)
+    {
+        byte[] bytes = BitConverter.GetBytes(value);
+        stream.Write(bytes);
+    }
+
+    public static bool UnpackBool(BinaryReader reader)
+    {
+        return reader.ReadBoolean();
     }
 
     // pack string

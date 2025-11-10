@@ -2,10 +2,11 @@
 
 using Server;
 using Protocol;
+using Common;
 
 namespace ChatServer;
 
-class LoginServer : ActorServer<ILoginClient, ILoginServer>, ILoginServer
+class LoginServer : ActorServer<ILoginClient, ILoginServer, NullData>, ILoginServer
 {
     string name = "";
     public LoginServer(): base()

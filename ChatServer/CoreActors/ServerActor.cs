@@ -6,7 +6,7 @@ using Microsoft.VisualBasic;
 
 namespace ChatServer;
 
-class ServerActor : ActorServer<IActorNull, IServer>, IServer
+class ServerActor : ActorServer<IActorNull, IServer, NullData>, IServer
 {
 
     ActorId lobbyId = default;

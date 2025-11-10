@@ -3,24 +3,23 @@ using Server;
 using Protocol;
 using Common.Sender;
 using System.Runtime.CompilerServices;
+using Common;
+using System.Security;
+using System.ComponentModel;
+using System.Reflection;
 
 namespace ChatServer;
 
-class ChatServer: ActorServer<IChatClient, IChatServer>, IChatServer
+
+partial class ChatServer: ActorServer<IChatClient, IChatServer, Protocol.ChatData>,
+    IChatServer
+//    IPropertyOwner
 {
     public ActorId roomId;
     string name = "";
 
-    int hp {
-        get
-        {
-            return hp;
-        }
-        set
-        {
-            hp = value;
-        }
-    }
+//    Protocol.ChatData props = new ChatData();
+
     ServerActor Server
     {
         get { return Game.GetServer<ServerActor>(); }
@@ -28,7 +27,27 @@ class ChatServer: ActorServer<IChatClient, IChatServer>, IChatServer
 
     public override void Init()
     {
+        props.SetOwner(this);
     }
+
+    public void _hp_Changed()
+    {
+        Console.WriteLine($"ChatActor._hp_Changed: {this.props.hp}");
+    }
+
+    public void _name_Changed()
+    {
+        Console.WriteLine($"ChatActor._name_Changed: {this.props.name}");
+    }
+
+    //public void OnPropertyChanged(Common.PropertyInfo info)
+    //{
+    //    MethodInfo? method = this.GetType().GetMethod(info.notifierName);
+    //    method?.Invoke(this, null);
+
+    //    MemoryStream stream = new MemoryStream();
+    //    info.packer(this.props, stream);
+    //}
 
     public override void Finit()
     {
@@ -44,6 +63,10 @@ class ChatServer: ActorServer<IChatClient, IChatServer>, IChatServer
         Server.EnterLobby(this.aid, this.name);
 
         client!.ShowMessage("I'am Ready");
+
+        // 以下是测试代码
+        this.props.hp = 1024;
+        this.props.name = "new_name";
     }
 
     public void ShowMessage(string msg)

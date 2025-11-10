@@ -80,6 +80,7 @@ public class InterfaceInfo
         InterfaceInfo info = new InterfaceInfo();
 
         info.name = inter.Name;
+        info.containingNamespace = inter.ContainingNamespace.Name;
 
         info.senderName = $"{info.name}_Sender";
         info.dispatcherName = $"{info.name}_Dispatcher";

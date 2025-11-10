@@ -62,11 +62,12 @@ public class ProtocolGenerator : IIncrementalGenerator
             }
 
             InterfaceInfo info = InterfaceInfo.Build(symbol);
-            infos.Add(info);
-            info.containingNamespace = symbol.ContainingNamespace.Name;
+//            info.containingNamespace = symbol.ContainingNamespace.Name;
 
             SenderBuilder.Build(sourceContext, info);
             DispatcherBuilder.Build(sourceContext, info);
+
+            infos.Add(info);
         }
 
         GenerateCreator(sourceContext, infos);

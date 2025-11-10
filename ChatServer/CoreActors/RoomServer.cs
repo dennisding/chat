@@ -7,7 +7,7 @@ using System.Security.AccessControl;
 
 namespace ChatServer;
 
-class RoomServer : ActorServer<IActorNull, IRoomServer>, IRoomServer
+class RoomServer : ActorServer<IActorNull, IRoomServer, NullData>, IRoomServer
 {
     string name = "";
     HashSet<ActorId> actors = new HashSet<Common.ActorId>();

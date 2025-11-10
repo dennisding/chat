@@ -5,7 +5,7 @@ using Common;
 
 namespace ChatClient;
 
-class LoginClient : ActorClient<ILoginClient, ILoginServer>, ILoginClient
+class LoginClient : ActorClient<ILoginClient, ILoginServer, NullData>, ILoginClient
 {
     public LoginClient()
     {

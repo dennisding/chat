@@ -4,7 +4,7 @@ using Protocol;
 
 namespace ChatClient;
 
-class ChatClient : ActorClient<IChatClient, IChatServer>, IChatClient
+class ChatClient : ActorClient<IChatClient, IChatServer, ChatData>, IChatClient
 {
 
     public override void OnClientBinded()
@@ -37,5 +37,15 @@ class ChatClient : ActorClient<IChatClient, IChatServer>, IChatClient
     public void CommandMessageTo(string userName, string msg)
     {
         server!.MessageTo(userName, msg);
+    }
+
+    public void _hp_Changed()
+    {
+        Console.WriteLine($"ChatClient._hp_Changed: {this.props.hp}");
+    }
+
+    public void _name_Changed()
+    {
+        Console.WriteLine($"ChatClient._name_Changed: {this.props.name}");
     }
 }

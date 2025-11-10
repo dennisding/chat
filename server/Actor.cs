@@ -1,5 +1,6 @@
 ﻿
 using Common;
+using System.Reflection;
 
 namespace Server;
 
@@ -8,6 +9,8 @@ public class Actor
     public ActorId aid;
     public string typeName = "";
     public ActorConnection? clientInfo;
+
+    bool propertyNotify = false;
 
     public Actor()
     {
@@ -52,16 +55,30 @@ public class Actor
     {
     }
 
-    public virtual void AttributeChanged(AttributeFlag flag, int index, MemoryStream data)
+    public virtual void AttributeChanged(PropertyFlag flag, int index, MemoryStream data)
     {
+    }
+
+    public virtual void PropertyChanged(PropertyFlag flag, int index, 
+        Action<MemoryStream> packer, 
+        Action updator)
+    {
+
+    }
+
+    public void SetPropertyNotify(bool notify)
+    {
+        this.propertyNotify = notify;
     }
 }
 
-public class ActorServer<ClientImpl, ServerImpl> : Actor
+public class ActorServer<ClientImpl, ServerImpl, DataImpl> : Actor, IPropertyOwner
     where ClientImpl: class
     where ServerImpl: class
+    where DataImpl: Common.Property, new()
 {
     public ClientImpl? client;
+    public DataImpl props = new DataImpl();
 
     ActorConnection? connection;
     IDispatcher<ServerImpl> dispatcher = Protocol.Dispatcher.Dispatcher.Create<ServerImpl>();
@@ -69,6 +86,7 @@ public class ActorServer<ClientImpl, ServerImpl> : Actor
     public ActorServer()
     {
         client = null;
+        props.SetOwner(this);
     }
 
     public override void BindClient(ActorConnection? con)
@@ -125,12 +143,44 @@ public class ActorServer<ClientImpl, ServerImpl> : Actor
         actor.BindClient(connection);
     }
 
-    public override void AttributeChanged(AttributeFlag flag, int index, MemoryStream data)
+    public override void AttributeChanged(PropertyFlag flag, int index, MemoryStream data)
     {
-//        base.AttributeChanged(flag, index, data);
-        if ((flag & AttributeFlag.Client) != 0)
+        if ((flag & PropertyFlag.OwnerClient) != 0)
         {
+            // send own client
         }
+    }
+
+    public override void PropertyChanged(PropertyFlag flag, int index, 
+        Action<MemoryStream> packer, 
+        Action notifier)
+    {
+        if ((flag & PropertyFlag.Client) != 0)
+        {
+            MemoryStream stream = new MemoryStream();
+            packer(stream);
+        }
+
+        // notify changed!!!
+        notifier();
+    }
+
+    public void OnPropertyChanged(Common.PropertyInfo info)
+    {
+        MethodInfo? notifier = this.GetType().GetMethod(info.notifierName);
+        notifier?.Invoke(this, null);
+
+        // notify to client!!!!
+        MemoryStream stream = new MemoryStream();
+        info.packer(this.props, stream);
+        connection!.remote.ActorPropertyChanged(this.aid, stream);
+//        connection!.remote.PropertyChanged(this.aid, stream);
+        // send to client
+        //MethodInfo? method = this.GetType().GetMethod(info.notifierName);
+        //method?.Invoke(this, null);
+
+        //MemoryStream stream = new MemoryStream();
+        //info.packer(this.props, stream);
     }
 }
 

@@ -14,7 +14,6 @@ class ChatClient : ActorClient<IChatClient, IChatServer, ChatData>, IChatClient
 
     public void ShowMessage(string msg)
     {
-        //        Console.WriteLine($"ActorClient.ShowMessage, {msg}");
         Console.WriteLine($"--- {msg}");
     }
 

@@ -55,17 +55,6 @@ public class Actor
     {
     }
 
-    public virtual void AttributeChanged(PropertyFlag flag, int index, MemoryStream data)
-    {
-    }
-
-    public virtual void PropertyChanged(PropertyFlag flag, int index, 
-        Action<MemoryStream> packer, 
-        Action updator)
-    {
-
-    }
-
     public void SetPropertyNotify(bool notify)
     {
         this.propertyNotify = notify;
@@ -143,27 +132,19 @@ public class ActorServer<ClientImpl, ServerImpl, DataImpl> : Actor, IPropertyOwn
         actor.BindClient(connection);
     }
 
-    public override void AttributeChanged(PropertyFlag flag, int index, MemoryStream data)
-    {
-        if ((flag & PropertyFlag.OwnerClient) != 0)
-        {
-            // send own client
-        }
-    }
+    //public override void PropertyChanged(PropertyFlag flag, int index, 
+    //    Action<MemoryStream> packer, 
+    //    Action notifier)
+    //{
+    //    if ((flag & PropertyFlag.Client) != 0)
+    //    {
+    //        MemoryStream stream = new MemoryStream();
+    //        packer(stream);
+    //    }
 
-    public override void PropertyChanged(PropertyFlag flag, int index, 
-        Action<MemoryStream> packer, 
-        Action notifier)
-    {
-        if ((flag & PropertyFlag.Client) != 0)
-        {
-            MemoryStream stream = new MemoryStream();
-            packer(stream);
-        }
-
-        // notify changed!!!
-        notifier();
-    }
+    //    // notify changed!!!
+    //    notifier();
+    //}
 
     public void OnPropertyChanged(Common.PropertyInfo info)
     {
@@ -173,7 +154,7 @@ public class ActorServer<ClientImpl, ServerImpl, DataImpl> : Actor, IPropertyOwn
         // notify to client!!!!
         MemoryStream stream = new MemoryStream();
         info.packer(this.props, stream);
-        connection!.remote.ActorPropertyChanged(this.aid, stream);
+        connection!.remote.ActorPropertyChanged(this.aid, info.index, stream);
 //        connection!.remote.PropertyChanged(this.aid, stream);
         // send to client
         //MethodInfo? method = this.GetType().GetMethod(info.notifierName);

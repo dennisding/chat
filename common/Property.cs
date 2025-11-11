@@ -8,6 +8,41 @@ public interface IPropertyOwner
     void OnPropertyChanged(PropertyInfo info);
 }
 
+public interface IProperty
+{
+    ClassInfo GetClassInfo();
+
+    // 以下接口可以直接用默认实现
+    void SetOwner(IPropertyOwner owner) { }
+    void OnPropertyChanged(PropertyInfo info)
+    {
+        MethodInfo? notifier = this.GetType().GetMethod(info.notifierName);
+        notifier?.Invoke(this, null);
+    }
+
+    void PackTo(MemoryStream stream)
+    {
+        foreach (var property in GetClassInfo().sortedInfos)
+        {
+            property.packer(this, stream);
+        }
+    }
+
+    void UnpackFrom(BinaryReader reader)
+    {
+        foreach (var property in GetClassInfo().sortedInfos)
+        {
+            property.unpacker(this, reader);
+        }
+    }
+
+    void UnpackProperty(int index, BinaryReader reader)
+    {
+        PropertyInfo? info = GetClassInfo().GetPropertyInfo(index);
+        info?.unpacker(this, reader);
+    }
+}
+
 public class PropertyInfo
 {
     public int index;
@@ -31,7 +66,7 @@ public class PropertyInfo
     }
 }
 
-public class Property
+public class Property : IProperty
 {
     IPropertyOwner? owner;
     bool notify = true;
@@ -45,7 +80,11 @@ public class Property
         this.owner = owner;
     }
 
-//    public void OnPropertyChanged(string notifierName, Action<MemoryStream> packer, Action notifier)
+    //public IPropertyOwner? GetOwner()
+    //{
+    //    return this.owner;
+    //}
+
     public void OnPropertyChanged(PropertyInfo info)
     {
         if (!notify)
@@ -53,8 +92,8 @@ public class Property
             return;
         }
 
-        MethodInfo? method = this.GetType().GetMethod(info.notifierName);
-        method?.Invoke(this, null);
+        MethodInfo? notifier = this.GetType().GetMethod(info.notifierName);
+        notifier?.Invoke(this, null);
 
         this.owner?.OnPropertyChanged(info);
     }
@@ -64,19 +103,8 @@ public class Property
         this.notify = notify;
     }
 
-    public void PackTo(MemoryStream stream)
+    public virtual ClassInfo GetClassInfo()
     {
+        return new ClassInfo("Null");
     }
-
-    public void UnpackFrom(BinaryReader reader)
-    {
-        SetNotify(false);
-
-        SetNotify(true);
-    }
-
-    public virtual void UnpackProperty(BinaryReader reader)
-    {
-    }
-
 }

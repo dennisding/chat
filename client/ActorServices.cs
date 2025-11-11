@@ -86,12 +86,12 @@ public class ActorServices : IClientServices, IBasicClient
         actor.DispatchMessage(reader);
     }
 
-    public void ActorPropertyChanged(ActorId aid, MemoryStream stream)
+    public void ActorPropertyChanged(ActorId aid, int index,MemoryStream stream)
     {
-        Console.WriteLine($"ActorPropertyChnaged: {aid}, {stream.Length}");
+        Console.WriteLine($"ActorPropertyChnaged: {aid}, {index}, {stream.Length}");
 
         Actor? actor = Game.GetActor(aid);
         BinaryReader reader = new BinaryReader(stream);
-        actor?.OnPropertyChanged(reader);
+        actor?.OnPropertyChanged(index,reader);
     }
 }

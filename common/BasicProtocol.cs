@@ -38,7 +38,7 @@ public interface IBasicClient
     void DelActor(ActorId aid);
     void BindClientTo(ActorId aid);
     void ActorMessage(ActorId aid, MemoryStream msg);
-    void ActorPropertyChanged(ActorId aid, MemoryStream msg);
+    void ActorPropertyChanged(ActorId aid, int index, MemoryStream msg);
 }
 
 [Protocol]

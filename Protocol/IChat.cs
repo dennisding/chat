@@ -64,33 +64,29 @@ public partial class ChatData : Common.Property
 // 这个类将由ProtocolGenerator自动生成
 public partial class ChatData
 {
-    public static ClassInfo classInfo = GetClassInfo();
+    public static ClassInfo classInfo = CreateClassInfo();
 
-    public static ClassInfo GetClassInfo()
+    public static ClassInfo CreateClassInfo()
     {
         ClassInfo info = new ClassInfo("ChatData");
 
         info.AddPropertyInfo(new Common.PropertyInfo(10, PropertyFlag.Client, "hp", _Pack_hp, _Unpack_hp));
         info.AddPropertyInfo(new Common.PropertyInfo(11, PropertyFlag.Client, "name", _Pack_name, _Unpack_name));
 
+        info.Build();
         return info;
     }
 
-    public override void UnpackProperty(BinaryReader reader)
+    public override ClassInfo GetClassInfo()
     {
-        int index = reader.ReadInt32();
-        PropertyInfo? info = classInfo.GetPropertyInfo(index);
-        if (info != null)
-        {
-            info.unpacker(this, reader);
-        }
+        return classInfo;
     }
 
     public static void _Pack_hp(object obj, MemoryStream stream)
     {
         ChatData self = (ChatData)obj;
-        int index = 10;
-        Common.Packer.PackInt(stream, index);
+        //int index = 10;
+        //Common.Packer.PackInt(stream, index);
         Common.Packer.PackInt(stream, self._hp);
     }
 
@@ -117,8 +113,8 @@ public partial class ChatData
     public static void _Pack_name(object obj, MemoryStream stream)
     {
         ChatData self = (ChatData)obj;
-        int index = 11;
-        Common.Packer.PackInt(stream, index);
+        //int index = 11;
+        //Common.Packer.PackInt(stream, index);
         Common.Packer.PackString(stream, self._name);
     }
 

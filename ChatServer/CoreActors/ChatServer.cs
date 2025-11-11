@@ -1,24 +1,15 @@
 ﻿
 using Server;
 using Protocol;
-using Common.Sender;
-using System.Runtime.CompilerServices;
-using Common;
-using System.Security;
-using System.ComponentModel;
-using System.Reflection;
 
 namespace ChatServer;
 
 
 partial class ChatServer: ActorServer<IChatClient, IChatServer, Protocol.ChatData>,
     IChatServer
-//    IPropertyOwner
 {
     public ActorId roomId;
     string name = "";
-
-//    Protocol.ChatData props = new ChatData();
 
     ServerActor Server
     {
@@ -39,15 +30,6 @@ partial class ChatServer: ActorServer<IChatClient, IChatServer, Protocol.ChatDat
     {
         Console.WriteLine($"ChatActor._name_Changed: {this.props.name}");
     }
-
-    //public void OnPropertyChanged(Common.PropertyInfo info)
-    //{
-    //    MethodInfo? method = this.GetType().GetMethod(info.notifierName);
-    //    method?.Invoke(this, null);
-
-    //    MemoryStream stream = new MemoryStream();
-    //    info.packer(this.props, stream);
-    //}
 
     public override void Finit()
     {

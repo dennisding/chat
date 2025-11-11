@@ -38,4 +38,6 @@ public enum PropertyFlag
     Client = OwnerClient | OtherClient,
     Save = (2 << 3),
     ServerOnly = (2 << 4),
+
+    All = Client | Save | ServerOnly
 }

@@ -26,6 +26,8 @@ public interface ILoginServer
 public interface IChatClient
 {
     void ShowMessage(string msg);
+
+    void SendData(ChatData data);
 }
 
 [Common.Protocol]

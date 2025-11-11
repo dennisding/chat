@@ -47,4 +47,9 @@ class ChatClient : ActorClient<IChatClient, IChatServer, ChatData>, IChatClient
     {
         Console.WriteLine($"ChatClient._name_Changed: {this.props.name}");
     }
+
+    public void SendData(ChatData data)
+    {
+        Console.WriteLine($"ChatClient.SendData: {data.hp}, {data.name}");
+    }
 }

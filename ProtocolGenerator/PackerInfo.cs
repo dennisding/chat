@@ -33,7 +33,9 @@ class PackerInfo
         {
             return value;
         }
-        return "Invalid Type:" + typeName;
+
+        return "Common.Packer.PackProperty";
+//        return "Invalid Type:" + typeName;
     }
 
     public static string GetUnpackerName(string typeName)
@@ -43,6 +45,7 @@ class PackerInfo
             return value;
         }
 
-        return "Invalid Type:" + typeName;
+        return $"Common.Packer.UnpackProperty<{typeName}>";
+//        return "Invalid Type:" + typeName;
     }
 }

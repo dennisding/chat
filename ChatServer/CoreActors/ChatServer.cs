@@ -49,6 +49,12 @@ partial class ChatServer: ActorServer<IChatClient, IChatServer, Protocol.ChatDat
         // 以下是测试代码
         this.props.hp = 1024;
         this.props.name = "new_name";
+
+        ChatData data = new ChatData();
+        data.hp = 66666;
+        data.name = "无名";
+
+        client!.SendData(data);
     }
 
     public void ShowMessage(string msg)

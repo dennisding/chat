@@ -72,4 +72,18 @@ public class Packer
         long value = reader.ReadInt64();
         return new ActorId(value);
     }
+
+    public static void PackProperty<T>(MemoryStream stream, T value)
+        where T : IProperty
+    {
+        value.PackTo(stream);
+    }
+
+    public static T UnpackProperty<T>(BinaryReader reader)
+        where T : IProperty, new()
+    {
+        T value = new T();
+        value.UnpackFrom(reader);
+        return value;
+    }
 }

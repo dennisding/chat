@@ -7,6 +7,13 @@ namespace Common;
 
 public class Packer
 {
+    static Dictionary<Type, Type> propertyTypes = new Dictionary<Type, Type>();
+
+    public static void RegisterType(Type dataType, Type implType)
+    {
+        propertyTypes.Add(dataType, implType);
+    }
+
     // pack int
     public static void PackInt(MemoryStream stream, int value)
     {
@@ -82,7 +89,10 @@ public class Packer
     public static T UnpackProperty<T>(BinaryReader reader)
         where T : IProperty, new()
     {
-        T value = new T();
+        Type implType = propertyTypes[typeof(T)];
+        T value = (T)Activator.CreateInstance(implType)!;
+
+//        T value = new T();
         value.UnpackFrom(reader);
         return value;
     }

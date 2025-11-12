@@ -1,5 +1,6 @@
 ﻿using Client;
 using Common;
+using Protocol;
 using Services;
 
 namespace ChatClient;
@@ -33,15 +34,28 @@ internal class Program
     {
         ActorServices services = new ActorServices();
 
-        services.AddActorType("Login", typeof(LoginClient));
-        services.AddActorType("Chat", typeof(ChatClient));
+        AddActors(services);
 
         return services;
+    }
+
+    static void AddActors(ActorServices services)
+    {
+        services.AddActorType("Login", typeof(LoginClient));
+        services.AddActorType("Chat", typeof(ChatClient));
+    }
+
+    static void AddDataImpl()
+    {
+        // 后续可以通过代码生成器来自动注册生成
+        Packer.RegisterType(typeof(ChatData), typeof(ClientChatData));
     }
 
     static void Init()
     {
         Common.Initer.Init();
+
+        AddDataImpl();
 
         Game.Init();
     }

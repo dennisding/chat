@@ -6,6 +6,11 @@ namespace ChatClient;
 
 class ChatClient : ActorClient<IChatClient, IChatServer, ChatData>, IChatClient
 {
+    public override void Init()
+    {
+        Console.WriteLine($"UserName: {this.props.name}");
+    }
+
 
     public override void OnClientBinded()
     {

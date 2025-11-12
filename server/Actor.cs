@@ -93,7 +93,10 @@ public class ActorServer<ClientImpl, ServerImpl, DataImpl> : Actor, IPropertyOwn
         }
 
         // 绑定客户端之前的准备工作
-        con.remote.CreateActor(this.typeName, this.aid);
+        MemoryStream stream = new MemoryStream();
+        Common.Packer.PackProperty(stream, props);
+
+        con.remote.CreateActor(this.typeName, this.aid, stream);
         con.remote.BindClientTo(this.aid);
 
         base.BindClient(con);

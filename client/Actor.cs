@@ -44,14 +44,17 @@ public class Actor
 
     public virtual void OnPropertyChanged(int index, BinaryReader reader)
     {
+    }
 
+    public virtual void UnpackProperty(BinaryReader? reader)
+    {
     }
 }
 
 public class ActorClient<ClientImpl, ServerImpl, DataImpl> : Actor, IPropertyOwner
     where ServerImpl: class
     where ClientImpl : class
-    where DataImpl : IProperty, new()
+    where DataImpl : Common.Property, IProperty, new()
 {
     public ServerImpl? server;
     IDispatcher<ClientImpl> dispatcher = Protocol.Dispatcher.Dispatcher.Create<ClientImpl>();
@@ -93,6 +96,20 @@ public class ActorClient<ClientImpl, ServerImpl, DataImpl> : Actor, IPropertyOwn
     {
         MethodInfo? notifier = this.GetType().GetMethod(info.notifierName);
         notifier?.Invoke(this, null);
+    }
+
+    public override void UnpackProperty(BinaryReader? reader)
+    {
+        if (reader == null)
+        {
+            return;
+        }
+
+        this.props.SetNotify(false);
+
+        this.props.UnpackFrom(reader);
+
+        this.props.SetNotify(true);
     }
 }
 

@@ -18,7 +18,7 @@ namespace Client
             actorTypes[name] = type;
         }
 
-        public ActorId CreateActor(string name, ActorId aid)
+        public ActorId CreateActor(string name, ActorId aid, BinaryReader? props = null)
         {
             if (actorTypes.TryGetValue(name, out Type? type))
             {
@@ -26,6 +26,10 @@ namespace Client
                 Actor actor = (Actor)Activator.CreateInstance(type)!;
                 actor.aid = aid;
                 actors[aid] = actor;
+
+                actor.UnpackProperty(props);
+
+                actor.Init();
             }
 
             return aid;

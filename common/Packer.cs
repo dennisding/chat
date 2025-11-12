@@ -89,11 +89,18 @@ public class Packer
     public static T UnpackProperty<T>(BinaryReader reader)
         where T : IProperty, new()
     {
-        Type implType = propertyTypes[typeof(T)];
-        T value = (T)Activator.CreateInstance(implType)!;
+        T? value;
 
-//        T value = new T();
-        value.UnpackFrom(reader);
+        if (propertyTypes.TryGetValue(typeof(T), out Type? implType))
+        {
+            value = (T?)Activator.CreateInstance(implType);
+        }
+        else
+        {
+            value = new T();
+        }
+
+        value!.UnpackFrom(reader);
         return value;
     }
 }

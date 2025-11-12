@@ -56,9 +56,9 @@ namespace Client
             return new ActorId(0);
         }
 
-        public static ActorId CreateActor(string type, ActorId aid)
+        public static ActorId CreateActor(string type, ActorId aid, BinaryReader? properties = null)
         {
-            return actorMgr.CreateActor(type, aid);
+            return actorMgr.CreateActor(type, aid, properties);
         }
 
         public static void DelActor(ActorId aid)

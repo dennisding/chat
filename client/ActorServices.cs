@@ -67,10 +67,11 @@ public class ActorServices : IClientServices, IBasicClient
         Console.WriteLine($"EchoBack: {msg}");
     }
 
-    public void CreateActor(string name, ActorId aid)
+    public void CreateActor(string name, ActorId aid, MemoryStream properties)
     {
-//        Console.WriteLine($"CreateActor:{name}, {aid}");
-        Game.CreateActor(name, aid);
+        //        Console.WriteLine($"CreateActor:{name}, {aid}");
+        BinaryReader reader = new BinaryReader(properties);
+        Game.CreateActor(name, aid, reader);
     }
 
     public void DelActor(ActorId aid)

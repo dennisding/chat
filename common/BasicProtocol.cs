@@ -34,7 +34,7 @@ public interface IBasicClient
 {
     void Echo(string msg);
     void EchoBack(string msg);
-    void CreateActor(string name, ActorId aid);
+    void CreateActor(string name, ActorId aid, MemoryStream properties);
     void DelActor(ActorId aid);
     void BindClientTo(ActorId aid);
     void ActorMessage(ActorId aid, MemoryStream msg);

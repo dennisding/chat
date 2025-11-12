@@ -60,7 +60,7 @@ public partial class ChatData : Common.Property
     int _hp;
 
     [Common.PropertyAttribute(PropertyFlag.Client)]
-    string _name = "";
+    string _name = "无";
 }
 
 // 这个类将由ProtocolGenerator自动生成

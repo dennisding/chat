@@ -7,11 +7,12 @@ using System.Collections.Immutable;
 
 namespace ProtocolGenerator;
 
+[Generator(LanguageNames.CSharp)]
 public class PropertyGenerator : IIncrementalGenerator
 {
     public void Initialize(IncrementalGeneratorInitializationContext context)
     {
-        var provider = context.SyntaxProvider.CreateSyntaxProvider(IsClassDeclaration, TransformInterface);
+        var provider = context.SyntaxProvider.CreateSyntaxProvider(IsClassDeclaration, TransformClass);
 
         var allClassProvider = provider.Collect();
 
@@ -23,7 +24,7 @@ public class PropertyGenerator : IIncrementalGenerator
         return node.IsKind(SyntaxKind.ClassDeclaration);
     }
 
-    GeneratorSyntaxContext TransformInterface(GeneratorSyntaxContext context, CancellationToken _)
+    GeneratorSyntaxContext TransformClass(GeneratorSyntaxContext context, CancellationToken _)
     {
         return context;
     }
@@ -31,18 +32,16 @@ public class PropertyGenerator : IIncrementalGenerator
     void GenerateAll(SourceProductionContext sourceContext,
         ImmutableArray<GeneratorSyntaxContext> syntaxContexts)
     {
-//        List<InterfaceInfo> infos = new List<InterfaceInfo>();
-
         foreach (var syntax in syntaxContexts)
         {
-            InterfaceDeclarationSyntax inter = (InterfaceDeclarationSyntax)syntax.Node;
-            var symbol = syntax.SemanticModel.GetDeclaredSymbol(inter)!;
+            ClassDeclarationSyntax classDecl = (ClassDeclarationSyntax)syntax.Node;
+            var symbol = syntax.SemanticModel.GetDeclaredSymbol(classDecl)!;
 
             bool isPproperty = false;
             foreach (var attrs in symbol.GetAttributes())
             {
                 string name = attrs.AttributeClass!.Name;
-                if (name == "Property")
+                if (name == "PropertyAttribute")
                 {
                     isPproperty = true;
                     break;
@@ -55,14 +54,7 @@ public class PropertyGenerator : IIncrementalGenerator
 
             ClassInfo info = ClassInfo.Build(symbol);
 
-            //InterfaceInfo info = InterfaceInfo.Build(symbol);
-            //infos.Add(info);
-            //info.containingNamespace = symbol.ContainingNamespace.Name;
-
-            //SenderBuilder.Build(sourceContext, info);
-            //DispatcherBuilder.Build(sourceContext, info);
+            PropertyBuilder.Build(sourceContext, info);
         }
-
-//        GenerateCreator(sourceContext, infos);
     }
 }

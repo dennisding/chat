@@ -56,7 +56,7 @@ class ChatClient : ActorClient<IChatClient, IChatServer, ChatData>, IChatClient
     public void SendData(ChatData data)
     {
 //        Item item = new Item();
-        Console.WriteLine($"ChatClient.SendData: {data.hp}, {data.name}");
+        Console.WriteLine($"ChatClient.SendData: {data.hp}, {data.name}, {data.friend}");
 
         ClientChatData? clientData = data as ClientChatData;
         if (clientData != null)

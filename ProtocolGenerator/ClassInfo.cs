@@ -11,12 +11,14 @@ class PropertyInfo
     public string typeName = "";
     public string name = "";
     public string flag = "";
+    public string packerName = "";
+    public string unpackerName = "";
 
-    public PropertyInfo(IPropertySymbol symbol)
+    public PropertyInfo(IFieldSymbol field)
     {
 
-        this.typeName = symbol.Type.Name;
-        string name = symbol.Name;
+        this.typeName = field.Type.ToDisplayString();
+        string name = field.Name;
 
         if (!name.StartsWith("_"))
         {
@@ -25,10 +27,12 @@ class PropertyInfo
 
         // skip the "_"
         this.name = name.Substring(1);
+        this.packerName = $"_Pack_{this.name}";
+        this.unpackerName = $"_Unpack_{this.name}";
 
-        foreach (AttributeData attribute in symbol.GetAttributes())
+        foreach (AttributeData attribute in field.GetAttributes())
         {
-            if (attribute.AttributeClass!.Name == "Property")
+            if (attribute.AttributeClass!.Name == "PropertyAttribute")
             {
                 GetAttributeInfo(attribute);
             }
@@ -37,27 +41,27 @@ class PropertyInfo
 
     void GetAttributeInfo(AttributeData attribute)
     {
-        foreach (var namedArgument in attribute.NamedArguments)
+        List<TypedConstant> arguments = attribute.ConstructorArguments.ToList();
+        // 第一个参数是flag
+        if (arguments.Count > 0)
         {
-            string name = namedArgument.Key;
-            TypedConstant value = namedArgument.Value;
-            // string valueString = value.ToCSharpString();
-            string valueString = value.ToString();
-            if (name == "index")
-            {
-                this.index = (int)value.Value!;
-            }
-            else if (name == "flag")
-            {
-                this.flag = value.ToString();
-            }
+            TypedConstant flag = arguments[0];
+            this.flag = flag.ToCSharpString();
+        }
+        
+        if (arguments.Count > 1)
+        {
+            // 第二个参数是index
+            TypedConstant index = arguments[1];
+            this.index = int.Parse(index.ToCSharpString());
+//            this.typeName = index.ToCSharpString();
         }
     }
 }
 
 class ClassInfo
 {
-    Dictionary<string, PropertyInfo> properties = new Dictionary<string, PropertyInfo>();
+    public Dictionary<string, PropertyInfo> properties = new Dictionary<string, PropertyInfo>();
 
     public string containningNamespace = "";
     public string name = "";
@@ -83,27 +87,49 @@ class ClassInfo
         return info;
     }
 
+    public IEnumerable<PropertyInfo> EnumeratePropertyInfo()
+    {
+        foreach (PropertyInfo property in properties.Values)
+        {
+            yield return property;
+        }
+    }
+
     void TryAddProperty(ISymbol symbol)
     {
-        IPropertySymbol? property = symbol as IPropertySymbol;
-        if (property == null)
+        IFieldSymbol? field = symbol as IFieldSymbol;
+        if (field == null)
         {
             return;
         }
 
-        foreach (var attribute in property.GetAttributes())
+        foreach (var attribute in field.GetAttributes())
         {
-            if (attribute.AttributeClass!.Name == "Property")
+            if (attribute.AttributeClass!.Name == "PropertyAttribute")
             {
-                AddProperty(property);
+                AddProperty(field);
             }
         }
+
+        //IPropertySymbol? property = symbol as IPropertySymbol;
+        //if (property == null)
+        //{
+        //    return;
+        //}
+
+        //foreach (var attribute in property.GetAttributes())
+        //{
+        //    if (attribute.AttributeClass!.Name == "PropertyAttribute")
+        //    {
+        //        AddProperty(property);
+        //    }
+        //}
     }
 
-    void AddProperty(IPropertySymbol property)
+    void AddProperty(IFieldSymbol field)
     {
-        string name = property.Name;
-        PropertyInfo info = new PropertyInfo(property);
+        string name = field.Name;
+        PropertyInfo info = new PropertyInfo(field);
 
         properties.Add(name, info);
     }

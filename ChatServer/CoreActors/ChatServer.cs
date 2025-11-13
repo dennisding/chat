@@ -53,6 +53,7 @@ partial class ChatServer: ActorServer<IChatClient, IChatServer, Protocol.ChatDat
         ChatData data = new ChatData();
         data.hp = 66666;
         data.name = "无名";
+        data.friend = this.aid;
 
         client!.SendData(data);
     }

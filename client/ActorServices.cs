@@ -21,11 +21,10 @@ public class ActorServices : IClientServices, IBasicClient
 
     public void BindClientTo(ActorId aid)
     {
-//        Console.WriteLine($"BindClientTo: {aid}");
-        Actor? lastActor = Game.GetActor(currentActor!);
-        if (lastActor != null)
+        Actor? oldActor = Game.GetActor(currentActor!);
+        if (oldActor != null)
         {
-            lastActor.BindClient(null);
+            oldActor.BindClient(null);
         }
 
         currentActor = aid;
@@ -87,12 +86,10 @@ public class ActorServices : IClientServices, IBasicClient
         actor.DispatchMessage(reader);
     }
 
-    public void ActorPropertyChanged(ActorId aid, int index,MemoryStream stream)
+    public void ActorPropertyChanged(ActorId aid, int index, MemoryStream stream)
     {
-        Console.WriteLine($"ActorPropertyChnaged: {aid}, {index}, {stream.Length}");
-
         Actor? actor = Game.GetActor(aid);
         BinaryReader reader = new BinaryReader(stream);
-        actor?.OnPropertyChanged(index,reader);
+        actor?.OnPropertyChanged(index, reader);
     }
 }

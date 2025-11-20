@@ -33,11 +33,12 @@ public class PropertyAttribute : Attribute
 public enum PropertyFlag
 {
     None = 0,
-    OwnerClient = (2 << 1),
+    OwnClient = (2 << 1),
     OtherClient = (2 << 2),
-    Client = OwnerClient | OtherClient,
     Save = (2 << 3),
     ServerOnly = (2 << 4),
 
-    All = Client | Save | ServerOnly
+    ClientOnly = OwnClient | OtherClient,
+    Client = ClientOnly | ServerOnly,
+    All = ClientOnly | Save | ServerOnly
 }

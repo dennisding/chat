@@ -2,9 +2,22 @@
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
+using Microsoft.CodeAnalysis.Diagnostics;
+using Microsoft.CodeAnalysis.Text;
 using System.Collections.Immutable;
+using System.Runtime.CompilerServices;
+using System.Text;
 
 namespace ProtocolGenerator;
+
+// 协议只能放在第一层namespace;
+// 数据属性必须以下划线打头, 会自动生成非下划线版本.
+//
+// 1. 协议分为数据协议和接口协议.
+// 2. 数据协议和接口协议都会生成 {ClassName}_ClassInfo对象. 该对象对Type做静态分析以产生更高效地代码
+// 3. 数据协议生成 partical class {ClassName} 对象.
+// 4. 接口协议生成 {ClassName}_Packer 和 {ClassName}_Dispatcher对象.
+// 5. 数据协议和接口协议都生成 {CalssName}_Creator 对象
 
 [Generator(LanguageNames.CSharp)]
 public class ProtocolGenerator : IIncrementalGenerator
@@ -23,12 +36,17 @@ public class ProtocolGenerator : IIncrementalGenerator
 
     bool IsInterfaceDeclaration(SyntaxNode node, CancellationToken token)
     {
-        if (!node.IsKind(SyntaxKind.InterfaceDeclaration))
+        if (node.IsKind(SyntaxKind.InterfaceDeclaration))
         {
-            return false;
+            return true;
         }
 
-        return true;
+        if (node.IsKind(SyntaxKind.ClassDeclaration))
+        {
+            return true;
+        }
+
+        return false;
     }
 
     GeneratorSyntaxContext TransformInterface(GeneratorSyntaxContext context, CancellationToken _)
@@ -39,60 +57,115 @@ public class ProtocolGenerator : IIncrementalGenerator
     void GenerateAll(SourceProductionContext sourceContext, 
         ImmutableArray<GeneratorSyntaxContext> syntaxContexts)
     {
-        List<InterfaceInfo> infos = new List<InterfaceInfo>();
+        List<ClassInfo> infos = new List<ClassInfo>();
 
         foreach (var syntax in syntaxContexts)
         {
-            InterfaceDeclarationSyntax inter = (InterfaceDeclarationSyntax)syntax.Node;
-            var symbol = syntax.SemanticModel.GetDeclaredSymbol(inter)!;
+            ClassInfo? info = null;
 
-            bool isProtocol = false;
-            foreach (var attrs in symbol.GetAttributes())
+            if (syntax.Node is InterfaceDeclarationSyntax inter)
             {
-                string name = attrs.AttributeClass!.Name;
-                if (name == "Protocol")
+                var symbol = syntax.SemanticModel.GetDeclaredSymbol(inter);
+                if (!HasAttribute(symbol!, "Protocol"))
                 {
-                    isProtocol = true;
-                    break;
+                    continue;
                 }
+                info = ClassInfo.Build(symbol!, true);
+                infos.Add(info);
+
+                PackerBuilder.Build(sourceContext, info);
+                DispatcherBuilder.Build(sourceContext, info);
             }
-            if (!isProtocol)
+            else if (syntax.Node is ClassDeclarationSyntax _class)
             {
-                continue;
+                var symbol = syntax.SemanticModel.GetDeclaredSymbol(_class);
+
+                if (!HasAttribute(symbol!, "PropertyAttribute"))
+                {
+                    continue;
+                }
+
+                info = ClassInfo.Build(symbol!);
+                infos.Add(info);
+
+                PartialBuilder.Build(sourceContext, info);
             }
 
-            InterfaceInfo info = InterfaceInfo.Build(symbol);
-//            info.containingNamespace = symbol.ContainingNamespace.Name;
-
-            SenderBuilder.Build(sourceContext, info);
-            DispatcherBuilder.Build(sourceContext, info);
-
-            infos.Add(info);
+            if (info != null)
+            {
+                ClassInfoBuilder.Build(sourceContext, info);
+            }
         }
 
-        GenerateCreator(sourceContext, infos);
+        CreatorBuilder.Build(sourceContext, infos);
+//        CreatorBuilder.Build(sourceContext, infos);
+
+        //List<InterfaceInfo> infos = new List<InterfaceInfo>();
+
+        //foreach (var syntax in syntaxContexts)
+        //{
+        //    InterfaceDeclarationSyntax inter = (InterfaceDeclarationSyntax)syntax.Node;
+        //    var symbol = syntax.SemanticModel.GetDeclaredSymbol(inter)!;
+
+        //    bool isProtocol = false;
+        //    foreach (var attrs in symbol.GetAttributes())
+        //    {
+        //        string name = attrs.AttributeClass!.Name;
+        //        if (name == "Protocol")
+        //        {
+        //            isProtocol = true;
+        //            break;
+        //        }
+        //    }
+        //    if (!isProtocol)
+        //    {
+        //        continue;
+        //    }
+
+        //    InterfaceInfo info = InterfaceInfo.Build(symbol);
+
+        //    SenderBuilder.Build(sourceContext, info);
+        //    DispatcherBuilder.Build(sourceContext, info);
+
+        //    infos.Add(info);
+        //}
+
+        //GenerateCreator(sourceContext, infos);
     }
 
-    void GenerateCreator(SourceProductionContext context, List<InterfaceInfo> infos)
+    bool HasAttribute(INamedTypeSymbol symbol, string attribute)
     {
-        // key = ContainingNamespace, value = List<...
-        Dictionary<string, List<InterfaceInfo>> infoDict = new Dictionary<string, List<InterfaceInfo>>();
-
-        foreach (var info in infos)
+        foreach (var attrs in symbol.GetAttributes())
         {
-            if (!infoDict.ContainsKey(info.containingNamespace))
+            string name = attrs.AttributeClass!.Name;
+            if (attrs.AttributeClass!.Name == attribute)
             {
-                infoDict[info.containingNamespace] = new List<InterfaceInfo>();
+                return true;
             }
-
-            var infoList = infoDict[info.containingNamespace];
-            infoList.Add(info);
         }
-
-        foreach (var item in infoDict)
-        {
-            CreatorBuilder.BuildSenderCreator(item.Key, context, item.Value);
-            CreatorBuilder.BuildDispathcerCreator(item.Key, context, item.Value);
-        }
+        return false;
     }
+
+    //void GenerateCreator(SourceProductionContext context, List<InterfaceInfo> infos)
+    //{
+    //    // key = ContainingNamespace, value = List<...
+    //    Dictionary<string, List<InterfaceInfo>> infoDict = new Dictionary<string, List<InterfaceInfo>>();
+
+    //    foreach (var info in infos)
+    //    {
+    //        if (!infoDict.ContainsKey(info.containingNamespace))
+    //        {
+    //            infoDict[info.containingNamespace] = new List<InterfaceInfo>();
+    //        }
+
+    //        var infoList = infoDict[info.containingNamespace];
+    //        infoList.Add(info);
+    //    }
+
+    //    foreach (var item in infoDict)
+    //    {
+    //        CreatorBuilder.BuildSenderCreator(item.Key, context, item.Value);
+    //        CreatorBuilder.BuildDispathcerCreator(item.Key, context, item.Value);
+    //    }
+    //}
 }

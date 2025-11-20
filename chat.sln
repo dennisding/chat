@@ -21,6 +21,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ProtocolGenerator", "Protoc
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Utils", "Utils\Utils.csproj", "{A2165F29-837C-4EDD-A2D7-07BB7F7AA3D1}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PostOffice", "PostOffice\PostOffice.csproj", "{F883617E-E25C-4FE3-B701-4D7C6C88F89F}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -63,6 +65,10 @@ Global
 		{A2165F29-837C-4EDD-A2D7-07BB7F7AA3D1}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{A2165F29-837C-4EDD-A2D7-07BB7F7AA3D1}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{A2165F29-837C-4EDD-A2D7-07BB7F7AA3D1}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F883617E-E25C-4FE3-B701-4D7C6C88F89F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F883617E-E25C-4FE3-B701-4D7C6C88F89F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F883617E-E25C-4FE3-B701-4D7C6C88F89F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F883617E-E25C-4FE3-B701-4D7C6C88F89F}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

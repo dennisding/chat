@@ -1,60 +1,60 @@
 ﻿
 
-using Microsoft.CodeAnalysis;
-using Microsoft.CodeAnalysis.CSharp;
-using Microsoft.CodeAnalysis.CSharp.Syntax;
-using System.Collections.Immutable;
+//using Microsoft.CodeAnalysis;
+//using Microsoft.CodeAnalysis.CSharp;
+//using Microsoft.CodeAnalysis.CSharp.Syntax;
+//using System.Collections.Immutable;
 
-namespace ProtocolGenerator;
+//namespace ProtocolGenerator;
 
-[Generator(LanguageNames.CSharp)]
-public class PropertyGenerator : IIncrementalGenerator
-{
-    public void Initialize(IncrementalGeneratorInitializationContext context)
-    {
-        var provider = context.SyntaxProvider.CreateSyntaxProvider(IsClassDeclaration, TransformClass);
+//[Generator(LanguageNames.CSharp)]
+//public class PropertyGenerator : IIncrementalGenerator
+//{
+//    public void Initialize(IncrementalGeneratorInitializationContext context)
+//    {
+//        var provider = context.SyntaxProvider.CreateSyntaxProvider(IsClassDeclaration, TransformClass);
 
-        var allClassProvider = provider.Collect();
+//        var allClassProvider = provider.Collect();
 
-        context.RegisterSourceOutput(allClassProvider, GenerateAll);
-    }
+//        context.RegisterSourceOutput(allClassProvider, GenerateAll);
+//    }
 
-    bool IsClassDeclaration(SyntaxNode node, CancellationToken token)
-    {
-        return node.IsKind(SyntaxKind.ClassDeclaration);
-    }
+//    bool IsClassDeclaration(SyntaxNode node, CancellationToken token)
+//    {
+//        return node.IsKind(SyntaxKind.ClassDeclaration);
+//    }
 
-    GeneratorSyntaxContext TransformClass(GeneratorSyntaxContext context, CancellationToken _)
-    {
-        return context;
-    }
+//    GeneratorSyntaxContext TransformClass(GeneratorSyntaxContext context, CancellationToken _)
+//    {
+//        return context;
+//    }
 
-    void GenerateAll(SourceProductionContext sourceContext,
-        ImmutableArray<GeneratorSyntaxContext> syntaxContexts)
-    {
-        foreach (var syntax in syntaxContexts)
-        {
-            ClassDeclarationSyntax classDecl = (ClassDeclarationSyntax)syntax.Node;
-            var symbol = syntax.SemanticModel.GetDeclaredSymbol(classDecl)!;
+//    void GenerateAll(SourceProductionContext sourceContext,
+//        ImmutableArray<GeneratorSyntaxContext> syntaxContexts)
+//    {
+//        foreach (var syntax in syntaxContexts)
+//        {
+//            ClassDeclarationSyntax classDecl = (ClassDeclarationSyntax)syntax.Node;
+//            var symbol = syntax.SemanticModel.GetDeclaredSymbol(classDecl)!;
 
-            bool isPproperty = false;
-            foreach (var attrs in symbol.GetAttributes())
-            {
-                string name = attrs.AttributeClass!.Name;
-                if (name == "PropertyAttribute")
-                {
-                    isPproperty = true;
-                    break;
-                }
-            }
-            if (!isPproperty)
-            {
-                continue;
-            }
+//            bool isProperty = false;
+//            foreach (var attrs in symbol.GetAttributes())
+//            {
+//                string name = attrs.AttributeClass!.Name;
+//                if (name == "PropertyAttribute")
+//                {
+//                    isProperty = true;
+//                    break;
+//                }
+//            }
+//            if (!isProperty)
+//            {
+//                continue;
+//            }
 
-            ClassInfo info = ClassInfo.Build(symbol);
+//            ClassInfo info = ClassInfo.Build(symbol);
 
-            PropertyBuilder.Build(sourceContext, info);
-        }
-    }
-}
+//            PropertyBuilder.Build(sourceContext, info);
+//        }
+//    }
+//}

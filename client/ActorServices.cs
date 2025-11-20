@@ -11,11 +11,13 @@ public class ActorServices : IClientServices, IBasicClient
     public IBasicServer? remote;
 
     ActorId currentActor = new ActorId();
-    IDispatcher<IBasicClient> dispatcher;
+    //    IDispatcher<IBasicClient> dispatcher;
+    IDispatcher dispatcher;
 
     public ActorServices()
     {
-        dispatcher = Common.Dispatcher.Dispatcher.Create<IBasicClient>();
+        // dispatcher = Common.Dispatcher.Dispatcher.Create<IBasicClient>();
+        dispatcher = new Common.IBasicClient_Dispatcher();
         Game.Init();
     }
 
@@ -38,16 +40,20 @@ public class ActorServices : IClientServices, IBasicClient
         this.client = client;
 
         ISender sender = new NetworkStreamSender(client.GetStream());
-        this.remote = Common.Sender.Sender.Create<IBasicServer>(sender);
+//        this.remote = Common.Sender.Sender.Create<IBasicServer>(sender);
+        remote = new IBasicServer_Packer(sender);
     }
 
     public void OnDisconnected()
     {
     }
 
-    public void DispatchMessage(BinaryReader reader)
+    public void DispatchMessage(byte[] data)
     {
-        dispatcher.Dispatch(this, reader);
+        var stream = new MemoryStream(data);
+        var reader = new MemoryStreamDataStreamReader(stream, PropertyFlag.Client);
+        // dispatcher.Dispatch(this, reader);
+        dispatcher.Dispatch(reader, this);
     }
 
     public void AddActorType(string name, Type type)
@@ -82,14 +88,14 @@ public class ActorServices : IClientServices, IBasicClient
     public void ActorMessage(ActorId aid, MemoryStream stream)
     {
         Actor actor = Game.GetActor(aid)!;
-        BinaryReader reader = new BinaryReader(stream);
-        actor.DispatchMessage(reader);
+//        BinaryReader reader = new BinaryReader(stream);
+        actor.DispatchMessage(stream);
     }
 
     public void ActorPropertyChanged(ActorId aid, int index, MemoryStream stream)
     {
         Actor? actor = Game.GetActor(aid);
-        BinaryReader reader = new BinaryReader(stream);
-        actor?.OnPropertyChanged(index, reader);
+        // BinaryReader reader = new BinaryReader(stream);
+        actor?.OnPropertyChanged(index, stream);
     }
 }

@@ -141,9 +141,10 @@ public class Server
 
     void OnDataReceived(ConnectionInfo info, byte[] data)
     {
-        MemoryStream stream = new MemoryStream(data);
-        BinaryReader reader = new BinaryReader(stream);
+        info.connection!.DispatchMessage(data);
+        //MemoryStream stream = new MemoryStream(data);
+        //BinaryReader reader = new BinaryReader(stream);
 
-        info.connection!.DispatchMessage(reader);
+        //info.connection!.DispatchMessage(reader);
     }
 }

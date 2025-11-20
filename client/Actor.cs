@@ -1,4 +1,5 @@
 ﻿using Common;
+using Protocol;
 using System.Reflection;
 
 namespace Client;
@@ -37,12 +38,12 @@ public class Actor
     {
     }
 
-    public virtual void DispatchMessage(BinaryReader reader)
+    public virtual void DispatchMessage(MemoryStream stream)
     {
 
     }
 
-    public virtual void OnPropertyChanged(int index, BinaryReader reader)
+    public virtual void OnPropertyChanged(int index, MemoryStream stream)
     {
     }
 
@@ -52,18 +53,29 @@ public class Actor
 }
 
 public class ActorClient<ClientImpl, ServerImpl, DataImpl> : Actor, IPropertyOwner
-    where ServerImpl: class
-    where ClientImpl : class
-    where DataImpl : Common.Property, IProperty, new()
+    where ServerImpl : class
+    where DataImpl : Property, IProperty, new()
+    //where ServerImpl: class
+    //where ClientImpl : class
+    //where DataImpl : Common.Property, IProperty, new()
 {
-    public ServerImpl? server;
-    IDispatcher<ClientImpl> dispatcher = Protocol.Dispatcher.Dispatcher.Create<ClientImpl>();
+    //public ServerImpl? server;
+    //IDispatcher<ClientImpl> dispatcher = Protocol.Dispatcher.Dispatcher.Create<ClientImpl>();
 
-    public DataImpl props = new DataImpl();
+    //public DataImpl props = new DataImpl();
+
+    public ServerImpl? server;
+    public DataImpl props;
+    public IDispatcher dispatcher;
 
     public ActorClient()
     {
-        this.props.SetOwner(this);
+        props = new DataImpl();
+        dispatcher = Protocol.ProtocolCreator.CreateDispatcher<ClientImpl>();
+        //builder = new BuilderImpl();
+        //this.props = builder.CreateProperties();
+        //this.dispatcher = builder.CreateDispatcher();
+//        this.props.SetOwner(this);
     }
 
     public override void BindClient(ActorServices? services) 
@@ -77,22 +89,25 @@ public class ActorClient<ClientImpl, ServerImpl, DataImpl> : Actor, IPropertyOwn
         }
 
         ISender sender = new ActorSender(aid, services);
-        server = Protocol.Sender.Sender.Create<ServerImpl>(sender);
+        server = Protocol.ProtocolCreator.CreatePacker<ServerImpl>(sender, PropertyFlag.Client);
 
         OnClientBinded();
     }
 
-    public override void DispatchMessage(BinaryReader reader)
+    public override void DispatchMessage(MemoryStream stream)
     {
-        dispatcher.Dispatch((this as ClientImpl)!, reader);
+        var reader = new MemoryStreamDataStreamReader(stream);
+        dispatcher.Dispatch(reader, this);
+//        dispatcher.Dispatch((this as ClientImpl)!, reader);
     }
 
-    public override void OnPropertyChanged(int index, BinaryReader reader)
+    public override void OnPropertyChanged(int index, MemoryStream stream)
     {
+        var reader = new MemoryStreamDataStreamReader(stream, PropertyFlag.Client);
         this.props.UnpackProperty(index, reader);
     }
 
-    public void OnPropertyChanged(Common.PropertyInfo info)
+    public void OnPropertyChanged(PropertyInfomation info)
     {
         MethodInfo? notifier = this.GetType().GetMethod(info.notifierName);
         notifier?.Invoke(this, null);
@@ -107,7 +122,7 @@ public class ActorClient<ClientImpl, ServerImpl, DataImpl> : Actor, IPropertyOwn
 
         this.props.SetNotify(false);
 
-        this.props.UnpackFrom(reader);
+//        this.props.UnpackFrom(reader);
 
         this.props.SetNotify(true);
     }

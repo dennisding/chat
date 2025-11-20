@@ -22,7 +22,7 @@ namespace Services
         void OnConnected();
         void OnDisconnected();
 
-        void DispatchMessage(BinaryReader data);
+        void DispatchMessage(byte[] data);
     }
 
     public interface IClientServices
@@ -30,6 +30,11 @@ namespace Services
         void OnConnected(TcpClient client);
         void OnDisconnected();
 
-        void DispatchMessage(BinaryReader reader);
+        void DispatchMessage(byte[] data);
+    }
+
+    public interface IBroadcastService
+    {
+        void OnMessage(BinaryReader reader);
     }
 }

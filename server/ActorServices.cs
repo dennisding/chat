@@ -38,14 +38,13 @@ public class ActorConnection: IConnection, IBasicServer
     public TcpClient client;
     public IBasicClient remote;
     ActorId aid;
-    public IDispatcher<IBasicServer> dispatcher;
+    IDispatcher dispatcher;
     public ActorConnection(TcpClient client)
     {
         this.client = client;
         ISender sender = new NetworkStreamSender(client.GetStream());
-        this.remote = Common.Sender.Sender.Create<IBasicClient>(sender);
-
-        this.dispatcher = Common.Dispatcher.Dispatcher.Create<IBasicServer>();
+        this.remote = Common.ProtocolCreator.CreatePacker<IBasicClient>(sender, PropertyFlag.Client);
+        this.dispatcher = Common.ProtocolCreator.CreateDispatcher<IBasicServer>();
     }
 
     public void OnConnected()
@@ -79,12 +78,13 @@ public class ActorConnection: IConnection, IBasicServer
         }
     }
 
-    public void DispatchMessage(BinaryReader data)
+    public void DispatchMessage(byte[] data)
     {
-        dispatcher.Dispatch(this, data);
+        var stream = new MemoryStream(data);
+        var reader = new MemoryStreamDataStreamReader(stream);
+        dispatcher.Dispatch(reader, this);
     }
 
-    // implement the protocol between client and server
     public void Echo(string msg)
     {
         Console.WriteLine($"Connection.Echo: {msg}");

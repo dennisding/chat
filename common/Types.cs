@@ -1,15 +1,16 @@
 ﻿
 //global using ActorId = long;
 
-namespace Common
+namespace Common;
+
+enum Location
 {
-    enum Location
-    {
-        None,
-        Client = 1,
-        Gate = 2,
-        Core = 4,
-        Shadow = 8,
-    }
-    public readonly record struct ActorId(long value);
+    None,
+    Client = 1,
+    Gate = 2,
+    Core = 4,
+    Shadow = 8,
 }
+public readonly record struct ActorId(long value);
+
+public readonly record struct Mailbox(ActorId office, ActorId actor = new ActorId());

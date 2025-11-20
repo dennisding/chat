@@ -13,16 +13,22 @@ class PackerInfo
 
     static void AddPackerInfos()
     {
-        AddPacker("int", "Common.Packer.PackInt", "Common.Packer.UnpackInt");
-        AddPacker("bool", "Common.Packer.PackBool", "Common.Packer.UnpackBool");
-        AddPacker("Boolean", "Common.Packer.PackBool", "Common.Packer.UnpackBool");
-        AddPacker("string", "Common.Packer.PackString", "Common.Packer.UnpackString");
-        AddPacker("Common.ActorId", "Common.Packer.PackActorId", "Common.Packer.UnpackActorId");
-        AddPacker("System.IO.MemoryStream", "Common.Packer.PackMemoryStream", "Common.Packer.UnpackMemoryStream");
+        AddPacker("int", "", "UnpackInt");
+        AddPacker("bool", "", "UnpackBool");
+        AddPacker("Boolean", "", "UnpackBool");
+        AddPacker("string", "", "UnpackString");
+        AddPacker("Common.ActorId", "", "UnpackActorId");
+        AddPacker("Common.Mailbox", "", "UnpackMailbox");
+        AddPacker("System.IO.MemoryStream", "", "UnpackMemoryStream");
     }
 
     static void AddPacker(string type, string packer, string unpacker)
     {
+        if (packer == "")
+        {
+            packer = "Pack";
+        }
+
         packerInfos[type] = packer;
         unpackInfos[type] = unpacker;
     }
@@ -34,7 +40,7 @@ class PackerInfo
             return value;
         }
 
-        return "Common.Packer.PackProperty";
+        return "Pack";
 //        return "Invalid Type:" + typeName;
     }
 
@@ -45,7 +51,8 @@ class PackerInfo
             return value;
         }
 
-        return $"Common.Packer.UnpackProperty<{typeName}>";
+        return $"UnpackProperty<{typeName}>";
+//        return $"Common.Packer.UnpackProperty<{typeName}>";
 //        return "Invalid Type:" + typeName;
     }
 }

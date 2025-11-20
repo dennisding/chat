@@ -43,6 +43,11 @@ public class Actor
     {
     }
 
+    public virtual void OnReceiveMail(MemoryStream stream)
+    {
+
+    }
+
     public virtual void BecomePlayer()
     {
     }
@@ -70,12 +75,13 @@ public class ActorServer<ClientImpl, ServerImpl, DataImpl> : Actor, IPropertyOwn
     public DataImpl props = new DataImpl();
 
     ActorConnection? connection;
-    IDispatcher<ServerImpl> dispatcher = Protocol.Dispatcher.Dispatcher.Create<ServerImpl>();
+    IDispatcher dispatcher;
 
     public ActorServer()
     {
         client = null;
         props.SetOwner(this);
+        dispatcher = Protocol.ProtocolCreator.CreateDispatcher<ServerImpl>();
     }
 
     public override void BindClient(ActorConnection? con)
@@ -94,7 +100,7 @@ public class ActorServer<ClientImpl, ServerImpl, DataImpl> : Actor, IPropertyOwn
 
         // 绑定客户端之前的准备工作
         MemoryStream stream = new MemoryStream();
-        Common.Packer.PackProperty(stream, props);
+//        Common.Packer.PackProperty(stream, props);
 
         con.remote.CreateActor(this.typeName, this.aid, stream);
         con.remote.BindClientTo(this.aid);
@@ -102,7 +108,8 @@ public class ActorServer<ClientImpl, ServerImpl, DataImpl> : Actor, IPropertyOwn
         base.BindClient(con);
 
         ISender sender = new ClientSender(aid, con);
-        client = Protocol.Sender.Sender.Create<ClientImpl>(sender);
+        // client = Protocol.Sender.Sender.Create<ClientImpl>(sender);
+        client = Protocol.ProtocolCreator.CreatePacker<ClientImpl>(sender, PropertyFlag.Client);
         connection = con;
 
         OnClientBinded();
@@ -122,8 +129,16 @@ public class ActorServer<ClientImpl, ServerImpl, DataImpl> : Actor, IPropertyOwn
 
     public override void DispatchMessage(MemoryStream stream)
     {
-        BinaryReader reader = new BinaryReader(stream);
-        dispatcher.Dispatch((this as ServerImpl)!, reader);
+        var reader = new MemoryStreamDataStreamReader(stream, PropertyFlag.Client);
+        dispatcher.Dispatch(reader, this);
+        //BinaryReader reader = new BinaryReader(stream);
+        //dispatcher.Dispatch((this as ServerImpl)!, reader);
+    }
+
+    public override void OnReceiveMail(MemoryStream stream)
+    {
+        DispatchMessage(stream);
+//        base.OnReceiveMail(stream);
     }
 
     public override void GiveClientTo(Actor actor)
@@ -135,15 +150,15 @@ public class ActorServer<ClientImpl, ServerImpl, DataImpl> : Actor, IPropertyOwn
         actor.BindClient(connection);
     }
 
-    public void OnPropertyChanged(Common.PropertyInfo info)
+    public void OnPropertyChanged(Common.PropertyInfomation info)
     {
         MethodInfo? notifier = this.GetType().GetMethod(info.notifierName);
         notifier?.Invoke(this, null);
 
         // notify to client!!!!
-        MemoryStream stream = new MemoryStream();
-        info.packer(this.props, stream);
-        connection!.remote.ActorPropertyChanged(this.aid, info.index, stream);
+        //MemoryStream stream = new MemoryStream();
+        //info.packer(this.props, stream);
+        //connection!.remote.ActorPropertyChanged(this.aid, info.index, stream);
     }
 }
 

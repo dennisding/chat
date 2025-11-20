@@ -27,6 +27,17 @@ public class NetworkStreamSender : ISender
     }
 }
 
+public class NullSender : ISender
+{
+    public void Send(MemoryStream data)
+    {
+    }
+
+    public void Close()
+    {
+    }
+}
+
 public class VisitorSender : ISender
 {
     public MemoryStream? data;

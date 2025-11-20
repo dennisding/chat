@@ -1,6 +1,7 @@
 ﻿
 using Common;
-using System.Runtime.CompilerServices;
+using System.IO.Pipelines;
+using System.Security.Cryptography.X509Certificates;
 
 namespace Protocol;
 
@@ -56,89 +57,122 @@ public interface IChatShadow
 [Common.PropertyAttribute]
 public partial class ChatData : Common.Property
 {
-    [Common.PropertyAttribute(PropertyFlag.ServerOnly, 2000)]
+    [Common.PropertyAttribute(PropertyFlag.ClientOnly, 2000)]
     int _hp;
 
-    [Common.PropertyAttribute(PropertyFlag.Client, 100)]
+    [Common.PropertyAttribute(PropertyFlag.ClientOnly, 100)]
     string _name = "无";
 
-    [Common.PropertyAttribute(PropertyFlag.Client)]
+    [Common.PropertyAttribute(PropertyFlag.ClientOnly)]
     ActorId _friend;
 }
 
-//// 这个类将由ProtocolGenerator自动生成
+//public class ProtocolCreator
+//{
+//    public static T CreatePacker<T>(ISender sender, PropertyFlag flag = PropertyFlag.All)
+//    {
+//        if (typeof(T) == typeof(ILoginClient))
+//        {
+//            return (T)(object)new ILoginClient_Packer(sender, flag);
+//        }
+//        else if (typeof(T) == typeof(ILoginServer))
+//        {
+//            return (T)(object)new ILoginServer_Packer(sender, flag);
+//        }
+
+//        throw new NotImplementedException();
+//    }
+
+//    public static IDispatcher CreateDispatcher<T>()
+//    {
+//        throw new NotImplementedException();
+//    }
+//}
+
 //public partial class ChatData
 //{
-//    public static ClassInfo classInfo = CreateClassInfo();
-
-//    public static ClassInfo CreateClassInfo()
-//    {
-//        ClassInfo info = new ClassInfo("ChatData");
-
-//        info.AddPropertyInfo(new Common.PropertyInfo(10, PropertyFlag.Client, "hp", _Pack_hp, _Unpack_hp));
-//        info.AddPropertyInfo(new Common.PropertyInfo(11, PropertyFlag.Client, "name", _Pack_name, _Unpack_name));
-
-//        info.Build();
-//        return info;
-//    }
-
-//    public override ClassInfo GetClassInfo()
-//    {
-//        return classInfo;
-//    }
-
-//    public static void _Pack_hp(object obj, MemoryStream stream)
-//    {
-//        ChatData self = (ChatData)obj;
-//        //int index = 10;
-//        //Common.Packer.PackInt(stream, index);
-//        Common.Packer.PackInt(stream, self._hp);
-//    }
-
-//    public static void _Unpack_hp(object obj, BinaryReader reader)
-//    {
-//        ChatData self = (ChatData)obj;
-//        int value = reader.ReadInt32();
-//        self.hp = value;
-//    }
-
-//    public static Common.PropertyInfo _hp_Info = classInfo.GetPropertyInfo("hp");
 //    public int hp
 //    {
 //        get { return this._hp; }
 //        set
 //        {
 //            this._hp = value;
-
-//            OnPropertyChanged(_hp_Info);
+//            OnPropertyChanged(ChatData_ClassInfo._hp_Info);
 //        }
 //    }
 
-//    // name
-//    public static void _Pack_name(object obj, MemoryStream stream)
-//    {
-//        ChatData self = (ChatData)obj;
-//        //int index = 11;
-//        //Common.Packer.PackInt(stream, index);
-//        Common.Packer.PackString(stream, self._name);
-//    }
-
-//    public static void _Unpack_name(object obj, BinaryReader reader)
-//    {
-//        ChatData self = (ChatData)obj;
-
-//        string name = Common.Packer.UnpackString(reader);
-//        self.name = name;
-//    }
-
-//    public static Common.PropertyInfo _name_Info = classInfo.GetPropertyInfo("name");
 //    public string name
 //    {
 //        get { return this._name; }
 //        set
 //        {
 //            this._name = value;
-//            OnPropertyChanged(_name_Info);
+//            OnPropertyChanged(ChatData_ClassInfo._name_Info);
 //        }
+//    }
+
+//    public ActorId friend
+//    {
+//        get { return this._friend; }
+//        set
+//        {
+//            this._friend = value;
+//            OnPropertyChanged(ChatData_ClassInfo._friend_Info);
+//        }
+//    }
+//}
+
+//public class ChatData_ClassInfo
+//{
+//    public static ClassInfo classInfo = CreateClassInfo();
+
+//    static ClassInfo CreateClassInfo()
+//    {
+//        ClassInfo info = new ClassInfo("ChatData");
+
+//        info.AddPropertyInfo(new PropertyInfomation(10, "hp", PropertyFlag.ClientOnly));
+//        info.AddPropertyInfo(new PropertyInfomation(11, "name", PropertyFlag.ClientOnly));
+//        info.AddPropertyInfo(new PropertyInfomation(12, "friend", PropertyFlag.ClientOnly));
+
+//        return info;
+//    }
+
+//    public static PropertyInfomation _hp_Info = classInfo.GetPropertyInfo("hp");
+//    public static void _Pack_hp(IDataStreamWriter datas, object ins)
+//    {
+//        ChatData self = (ChatData)ins;
+//        Common.Packer.Pack(datas, _hp_Info, self.hp);
+//    }
+
+//    public static void _Unpack_hp(IDataStreamReader reader, object ins)
+//    {
+//        ChatData self = (ChatData)ins;
+//        self.hp = Common.Packer.UnpackInt(reader, _hp_Info);
+//    }
+
+//    public static PropertyInfomation _name_Info = classInfo.GetPropertyInfo("name");
+//    public static void _Pack_name(IDataStreamWriter datas, object ins)
+//    {
+//        ChatData self = (ChatData)ins;
+//        Common.Packer.Pack(datas, _name_Info, self.name);
+//    }
+
+//    public static void _Unpack_name(IDataStreamReader reader, object ins)
+//    {
+//        ChatData self = (ChatData)ins;
+//        self.name = Common.Packer.UnpackString(reader, _name_Info);
+//    }
+
+//    public static PropertyInfomation _friend_Info = classInfo.GetPropertyInfo("friend");
+//    public static void _Pack_friend(IDataStreamWriter datas, object ins)
+//    {
+//        ChatData self = (ChatData)ins;
+//        Common.Packer.Pack(datas, _friend_Info, self.friend);
+//    }
+
+//    public static void _Unpack_friend(IDataStreamReader reader, object ins)
+//    {
+//        ChatData self = (ChatData)ins;
+//        self.friend = Common.Packer.UnpackActorId(reader, _friend_Info);
 //    }
 //}

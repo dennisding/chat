@@ -115,10 +115,10 @@ public class Client
             connected = false;
             return;
         }
-        MemoryStream stream = new MemoryStream(data);
-        BinaryReader reader = new BinaryReader(stream);
+        //MemoryStream stream = new MemoryStream(data);
+        //BinaryReader reader = new BinaryReader(stream);
 
-        services.DispatchMessage(reader);
+        services.DispatchMessage(data);
     }
 
     async Task HandleReadAsync(string host, int port)

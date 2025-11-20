@@ -1,5 +1,6 @@
 ﻿
 using Client;
+using Common;
 using Protocol;
 
 namespace ChatClient;
@@ -10,7 +11,6 @@ class ChatClient : ActorClient<IChatClient, IChatServer, ChatData>, IChatClient
     {
         Console.WriteLine($"UserName: {this.props.name}");
     }
-
 
     public override void OnClientBinded()
     {

@@ -55,15 +55,7 @@ public class Actor
 public class ActorClient<ClientImpl, ServerImpl, DataImpl> : Actor, IPropertyOwner
     where ServerImpl : class
     where DataImpl : Property, IProperty, new()
-    //where ServerImpl: class
-    //where ClientImpl : class
-    //where DataImpl : Common.Property, IProperty, new()
 {
-    //public ServerImpl? server;
-    //IDispatcher<ClientImpl> dispatcher = Protocol.Dispatcher.Dispatcher.Create<ClientImpl>();
-
-    //public DataImpl props = new DataImpl();
-
     public ServerImpl? server;
     public DataImpl props;
     public IDispatcher dispatcher;
@@ -72,10 +64,6 @@ public class ActorClient<ClientImpl, ServerImpl, DataImpl> : Actor, IPropertyOwn
     {
         props = new DataImpl();
         dispatcher = Protocol.ProtocolCreator.CreateDispatcher<ClientImpl>();
-        //builder = new BuilderImpl();
-        //this.props = builder.CreateProperties();
-        //this.dispatcher = builder.CreateDispatcher();
-//        this.props.SetOwner(this);
     }
 
     public override void BindClient(ActorServices? services) 
@@ -98,7 +86,6 @@ public class ActorClient<ClientImpl, ServerImpl, DataImpl> : Actor, IPropertyOwn
     {
         var reader = new MemoryStreamDataStreamReader(stream);
         dispatcher.Dispatch(reader, this);
-//        dispatcher.Dispatch((this as ClientImpl)!, reader);
     }
 
     public override void OnPropertyChanged(int index, MemoryStream stream)

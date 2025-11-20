@@ -55,15 +55,6 @@ class PartialBuilder
 
     void AddPropertyInfo(PropertyInfo info, Indent indent)
     {
-        //public string name
-        //{
-        //    get { return this._name; }
-        //    set
-        //    {
-        //        this._name = value;
-        //        OnPropertyChanged(ChatData_ClassInfo._name_Info);
-        //    }
-        //}
         Indent indent1 = indent.Next();
         Indent indent2 = indent1.Next();
 

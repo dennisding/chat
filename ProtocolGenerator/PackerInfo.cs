@@ -41,7 +41,6 @@ class PackerInfo
         }
 
         return "Pack";
-//        return "Invalid Type:" + typeName;
     }
 
     public static string GetUnpackerName(string typeName)
@@ -52,7 +51,5 @@ class PackerInfo
         }
 
         return $"UnpackProperty<{typeName}>";
-//        return $"Common.Packer.UnpackProperty<{typeName}>";
-//        return "Invalid Type:" + typeName;
     }
 }

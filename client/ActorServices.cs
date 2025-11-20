@@ -11,13 +11,11 @@ public class ActorServices : IClientServices, IBasicClient
     public IBasicServer? remote;
 
     ActorId currentActor = new ActorId();
-    //    IDispatcher<IBasicClient> dispatcher;
     IDispatcher dispatcher;
 
     public ActorServices()
     {
-        // dispatcher = Common.Dispatcher.Dispatcher.Create<IBasicClient>();
-        dispatcher = new Common.IBasicClient_Dispatcher();
+        dispatcher = Common.ProtocolCreator.CreateDispatcher<IBasicClient>();
         Game.Init();
     }
 
@@ -40,7 +38,6 @@ public class ActorServices : IClientServices, IBasicClient
         this.client = client;
 
         ISender sender = new NetworkStreamSender(client.GetStream());
-//        this.remote = Common.Sender.Sender.Create<IBasicServer>(sender);
         remote = new IBasicServer_Packer(sender);
     }
 
@@ -52,7 +49,7 @@ public class ActorServices : IClientServices, IBasicClient
     {
         var stream = new MemoryStream(data);
         var reader = new MemoryStreamDataStreamReader(stream, PropertyFlag.Client);
-        // dispatcher.Dispatch(this, reader);
+
         dispatcher.Dispatch(reader, this);
     }
 
@@ -74,7 +71,6 @@ public class ActorServices : IClientServices, IBasicClient
 
     public void CreateActor(string name, ActorId aid, MemoryStream properties)
     {
-        //        Console.WriteLine($"CreateActor:{name}, {aid}");
         BinaryReader reader = new BinaryReader(properties);
         Game.CreateActor(name, aid, reader);
     }
@@ -88,14 +84,12 @@ public class ActorServices : IClientServices, IBasicClient
     public void ActorMessage(ActorId aid, MemoryStream stream)
     {
         Actor actor = Game.GetActor(aid)!;
-//        BinaryReader reader = new BinaryReader(stream);
         actor.DispatchMessage(stream);
     }
 
     public void ActorPropertyChanged(ActorId aid, int index, MemoryStream stream)
     {
         Actor? actor = Game.GetActor(aid);
-        // BinaryReader reader = new BinaryReader(stream);
         actor?.OnPropertyChanged(index, stream);
     }
 }

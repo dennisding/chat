@@ -98,39 +98,6 @@ public class ProtocolGenerator : IIncrementalGenerator
         }
 
         CreatorBuilder.Build(sourceContext, infos);
-//        CreatorBuilder.Build(sourceContext, infos);
-
-        //List<InterfaceInfo> infos = new List<InterfaceInfo>();
-
-        //foreach (var syntax in syntaxContexts)
-        //{
-        //    InterfaceDeclarationSyntax inter = (InterfaceDeclarationSyntax)syntax.Node;
-        //    var symbol = syntax.SemanticModel.GetDeclaredSymbol(inter)!;
-
-        //    bool isProtocol = false;
-        //    foreach (var attrs in symbol.GetAttributes())
-        //    {
-        //        string name = attrs.AttributeClass!.Name;
-        //        if (name == "Protocol")
-        //        {
-        //            isProtocol = true;
-        //            break;
-        //        }
-        //    }
-        //    if (!isProtocol)
-        //    {
-        //        continue;
-        //    }
-
-        //    InterfaceInfo info = InterfaceInfo.Build(symbol);
-
-        //    SenderBuilder.Build(sourceContext, info);
-        //    DispatcherBuilder.Build(sourceContext, info);
-
-        //    infos.Add(info);
-        //}
-
-        //GenerateCreator(sourceContext, infos);
     }
 
     bool HasAttribute(INamedTypeSymbol symbol, string attribute)
@@ -145,27 +112,4 @@ public class ProtocolGenerator : IIncrementalGenerator
         }
         return false;
     }
-
-    //void GenerateCreator(SourceProductionContext context, List<InterfaceInfo> infos)
-    //{
-    //    // key = ContainingNamespace, value = List<...
-    //    Dictionary<string, List<InterfaceInfo>> infoDict = new Dictionary<string, List<InterfaceInfo>>();
-
-    //    foreach (var info in infos)
-    //    {
-    //        if (!infoDict.ContainsKey(info.containingNamespace))
-    //        {
-    //            infoDict[info.containingNamespace] = new List<InterfaceInfo>();
-    //        }
-
-    //        var infoList = infoDict[info.containingNamespace];
-    //        infoList.Add(info);
-    //    }
-
-    //    foreach (var item in infoDict)
-    //    {
-    //        CreatorBuilder.BuildSenderCreator(item.Key, context, item.Value);
-    //        CreatorBuilder.BuildDispathcerCreator(item.Key, context, item.Value);
-    //    }
-    //}
 }
